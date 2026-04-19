@@ -4,6 +4,7 @@ project(2026-jaros)
 set(CMAKE_CXX_STANDARD 23)
 set(TEST_DIRECTORY "${PROJECT_SOURCE_DIR}/Tests")
 set(PARSER_DIRECTORY "${PROJECT_SOURCE_DIR}/pomdp-parser")
+set(QUANTIFIER_DIRECTORY "${PROJECT_SOURCE_DIR}/performace-quantifier")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -16,3 +17,4 @@ FetchContent_MakeAvailable(Catch2)
 
 add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
+add_subdirectory("${QUANTIFIER_DIRECTORY}")
