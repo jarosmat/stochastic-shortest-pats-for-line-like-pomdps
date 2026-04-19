@@ -3,5 +3,8 @@ project(2026-jaros)
 
 set(CMAKE_CXX_STANDARD 23)
 set(POMDP_DIR "${PROJECT_SOURCE_DIR}/pomdps")
+set(PROB_DIR "${PROJECT_SOURCE_DIR}/probability")
+
 
 add_subdirectory("${POMDP_DIR}")
+add_subdirectory("${PROB_DIR}")
