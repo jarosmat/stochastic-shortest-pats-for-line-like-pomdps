@@ -1,6 +1,5 @@
 #include "prob.hpp"
 
-#include <stdexcept>
 
 prob prob::operator+(const prob &other) const {
     return prob(val + other.val);
@@ -8,6 +7,23 @@ prob prob::operator+(const prob &other) const {
 
 prob & prob::operator+=(const prob &other) {
     val += other.val;
+    return *this;
+}
+
+prob & prob::operator-=(const prob other) {
+    val -= other.val;
+    return *this;
+}
+
+prob & prob::operator*=(const prob other) {
+    val *= other.val;
+    return *this;
+}
+
+prob & prob::operator/=(const prob other) {
+    if (other.val == 0.0)
+        throw std::runtime_error("Division by zero in prob");
+    val /= other.val;
     return *this;
 }
 
@@ -28,6 +44,8 @@ bool prob::operator==(const prob &other) const {
     return val == other.val;
 }
 
+bool prob::operator!=(const prob other) const { return val != other.val; }
+
 bool prob::operator<(const prob &other) const {
     return val < other.val;
 }
@@ -36,6 +54,17 @@ bool prob::operator>(const prob &other) const {
     return val > other.val;
 }
 
+bool prob::operator<=(const prob &other) const { return val <= other.val; }
+
+bool prob::operator>=(const prob &other) const { return val >= other.val; }
+
 prob::prob(const double val):val(val) {
 }
 
+prob min(const prob &a, const prob &b) {
+    return prob(std::min(a.val, b.val));
+}
+
+prob max(const prob &a, const prob &b) {
+    return prob(std::max(a.val, b.val));
+}
