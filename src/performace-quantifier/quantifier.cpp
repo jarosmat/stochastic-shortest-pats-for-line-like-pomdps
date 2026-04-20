@@ -23,14 +23,3 @@ std::size_t sampleIndex(const std::vector<prob> &probs) {
 
     return i;
 }
-
-bool simulateThreshold(belief &start_b, const lineLikePomdp &pomdp, std::size_t T) {
-    for (std::size_t i = 0; i < T; i++) {
-
-    }
-}
-
-prob quantifyThreshold_s(belief &&startb, const lineLikePomdp &pomdp, std::size_t T, const std::size_t reps = 10000) {
-    for (std::size_t i = 0; i < reps; ++i) {
-    }
-}
