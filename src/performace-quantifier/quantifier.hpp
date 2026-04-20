@@ -41,4 +41,21 @@ prob quantifyThreshold_s(const belief &startb, const lineLikePomdp &pomdp, std::
     return prob(static_cast<double>(count) / static_cast<double>(reps));
 }
 
+template<typename IT>
+std::vector<prob> quantifyThreshold_m(belief &&startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy) {
+    if (T == 0) {
+        return pomdp.GetFinalStatesProbs(std::move(startb));
+    }
+    action action = *policy;
+    auto interRes = pomdp.UpdateBelief(std::move(startb), action);
+    ++policy;
+
+    for (std::size_t i = 1; i < T; ++i) {
+        action = *policy;
+        interRes = pomdp.UpdateBelief(std::move(interRes), action);
+        ++policy;
+    }
+
+    return pomdp.GetFinalStatesProbs(std::move(interRes));
+}
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
