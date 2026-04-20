@@ -25,6 +25,8 @@ public:
     [[nodiscard]] belief SimulateAction(action action, state state) const;
 
     [[nodiscard]] bool IsFinalState(state state) const;
+
+    std::vector<prob> GetFinalStatesProbs(belief &&bel) const;
 };
 
 

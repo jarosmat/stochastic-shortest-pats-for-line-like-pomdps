@@ -49,3 +49,7 @@ belief lineLikePomdp::SimulateAction(const action action, const state state) con
 bool lineLikePomdp::IsFinalState(const state state) const {
     return state == states - 1;
 }
+
+std::vector<prob> lineLikePomdp::GetFinalStatesProbs(belief &&bel) const {
+    return {bel[states - 1]};
+}
