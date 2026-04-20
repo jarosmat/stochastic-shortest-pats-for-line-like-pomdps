@@ -15,7 +15,7 @@ bool simulateThreshold(const belief &startb, const lineLikePomdp &pomdp, std::si
         return true;
     }
     for (std::size_t i = 0; i < T; ++i) {
-        const std::size_t action = *policy;
+        const action action = *policy;
         ++policy;
         auto nextb = pomdp.SimulateAction(action, state);
 
