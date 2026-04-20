@@ -3,6 +3,8 @@
 
 
 #include <stdexcept>
+#include <iostream>
+
 
 using val_t = double;
 
@@ -40,6 +42,10 @@ struct prob {
     friend prob min(const prob &a, const prob &b);
 
     friend prob max(const prob &a, const prob &b);
+
+    explicit operator double() const;
+
+    friend std::ostream &operator<<(std::ostream &os, const prob &val);
 
 private:
     val_t val;

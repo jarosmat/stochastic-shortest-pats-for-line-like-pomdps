@@ -61,10 +61,18 @@ bool prob::operator>=(const prob &other) const { return val >= other.val; }
 prob::prob(const double val):val(val) {
 }
 
+prob::operator double() const {
+    return val;
+}
+
 prob min(const prob &a, const prob &b) {
     return prob(std::min(a.val, b.val));
 }
 
 prob max(const prob &a, const prob &b) {
     return prob(std::max(a.val, b.val));
+}
+
+std::ostream &operator<<(std::ostream &os, const prob &val) {
+    return os << val.val;
 }
