@@ -10,8 +10,10 @@ using action = std::size_t;
 
 class lineLikePomdp {
     std::size_t states = 0;
-    std::vector<prob> probs_;
 
+    // probs_[i] is the probability to move from state i when in that state and when action i is played
+    std::vector<prob> probs_;
+public:
     explicit lineLikePomdp(std::vector<prob> &&probs);
 
     explicit lineLikePomdp(const std::vector<prob> &probs);

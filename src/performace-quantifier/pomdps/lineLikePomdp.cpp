@@ -1,9 +1,9 @@
 #include "lineLikePomdp.hpp"
 
-lineLikePomdp::lineLikePomdp(std::vector<prob> &&probs): states(probs.size() + 1), probs_(std::move(probs)) {
+lineLikePomdp::lineLikePomdp(std::vector<prob> &&probs) : states(probs.size() + 1), probs_(std::move(probs)) {
 }
 
-lineLikePomdp::lineLikePomdp(const std::vector<prob> &probs): states(probs.size() + 1), probs_(probs) {
+lineLikePomdp::lineLikePomdp(const std::vector<prob> &probs) : states(probs.size() + 1), probs_(probs) {
 }
 
 belief lineLikePomdp::SimulateAction(const action action, const state state) const {
