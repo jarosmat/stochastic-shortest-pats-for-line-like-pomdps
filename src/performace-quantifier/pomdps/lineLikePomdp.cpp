@@ -45,3 +45,7 @@ belief lineLikePomdp::SimulateAction(const action action, const state state) con
 
     return res;
 }
+
+bool lineLikePomdp::IsFinalState(const state state) const {
+    return state == states - 1;
+}

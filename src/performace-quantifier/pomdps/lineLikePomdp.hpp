@@ -23,6 +23,8 @@ public:
     [[nodiscard]] belief UpdateBelief(const belief &bel, action action) const;
 
     [[nodiscard]] belief SimulateAction(action action, state state) const;
+
+    [[nodiscard]] bool IsFinalState(state state) const;
 };
 
 
