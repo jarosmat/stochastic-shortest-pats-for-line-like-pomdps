@@ -18,8 +18,9 @@ public:
 
     explicit lineLikePomdp(const std::vector<prob> &probs);
 
-    belief UpdateBelief(belief &&bel, action action);
+    belief UpdateBelief(belief &&bel, action action) const;
 
+    [[nodiscard]] belief UpdateBelief(const belief &bel, action action) const;
 
     [[nodiscard]] belief SimulateAction(action action, state state) const;
 };
