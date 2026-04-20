@@ -9,7 +9,7 @@
 std::size_t sampleIndex(const std::vector<prob> &probs);
 
 template<typename IT>
-bool simulateThreshold(belief &startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy) {
+bool simulateThreshold(const belief &startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy) {
     auto state = sampleIndex(startb.bel);
     if (pomdp.IsFinalState(state)) {
         return true;
@@ -29,9 +29,8 @@ bool simulateThreshold(belief &startb, const lineLikePomdp &pomdp, std::size_t T
 }
 
 template<typename IT>
-prob quantifyThreshold_s(belief &&startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy,
+prob quantifyThreshold_s(const belief &startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy,
                          const std::size_t reps = 10000) {
-
     std::size_t count = 0;
     for (std::size_t i = 0; i < reps; ++i) {
         if (simulateThreshold(startb, pomdp, T, policy)) {
@@ -39,6 +38,7 @@ prob quantifyThreshold_s(belief &&startb, const lineLikePomdp &pomdp, std::size_
         }
     }
 
-    return prob(static_cast<double>(count)/static_cast<double>(reps));
+    return prob(static_cast<double>(count) / static_cast<double>(reps));
 }
+
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
