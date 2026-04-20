@@ -31,5 +31,14 @@ bool simulateThreshold(belief &startb, const lineLikePomdp &pomdp, std::size_t T
 template<typename IT>
 prob quantifyThreshold_s(belief &&startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy,
                          const std::size_t reps = 10000) {
+
+    std::size_t count = 0;
+    for (std::size_t i = 0; i < reps; ++i) {
+        if (simulateThreshold(startb, pomdp, T, policy)) {
+            ++count;
+        }
+    }
+
+    return prob(static_cast<double>(count)/static_cast<double>(reps));
 }
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
