@@ -42,6 +42,9 @@ belief lineLikePomdp::SimulateAction(const action action, const state state) con
         res[state] = prob(1) - probs_[state];
         res[state + 1] = probs_[state];
     }
+    else {
+        res[state] = prob(1);
+    }
 
     return res;
 }
