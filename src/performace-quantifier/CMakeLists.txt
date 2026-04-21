@@ -13,5 +13,5 @@ add_subdirectory("${BELIEF_DIR}")
 
 
 add_library(Quantifier quantifier.cpp)
-target_include_directories(Quantifier PUBLIC "${POMDP_DIR}" "${PROB_DIR}" "${BELIEF_DIR}")
+target_include_directories(Quantifier PUBLIC "${POMDP_DIR}" "${PROB_DIR}" "${BELIEF_DIR}" "${PROJECT_SOURCE_DIR}")
 target_link_libraries(Quantifier PUBLIC Prob LinePOMDP Belief)
