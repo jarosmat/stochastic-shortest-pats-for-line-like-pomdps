@@ -33,6 +33,7 @@ prob quantifyThreshold_s(const belief &startb, const lineLikePomdp &pomdp, std::
                          const std::size_t reps = 10000) {
     std::size_t count = 0;
     for (std::size_t i = 0; i < reps; ++i) {
+        policy.reset();
         if (simulateThreshold(startb, pomdp, T, policy)) {
             ++count;
         }
