@@ -59,4 +59,35 @@ std::vector<prob> quantifyThreshold_m(belief &&startb, const lineLikePomdp &pomd
 
     return pomdp.GetFinalStatesProbs(std::move(interRes));
 }
+
+template<typename IT>
+std::size_t simulateExpectation(const belief &startb, const lineLikePomdp &pomdp, IT &policy) {
+    std::size_t count = 0;
+    auto state = sampleIndex(startb.bel);
+
+    while (!pomdp.IsFinalState(state)) {
+        const action action = *policy;
+        ++policy;
+        auto nextb = pomdp.SimulateAction(action, state);
+        ++count;
+
+        state = sampleIndex(nextb.bel);
+    }
+
+    return count;
+}
+
+template<typename IT>
+double quantifyExpectation_s(const belief &startb, const lineLikePomdp &pomdp, IT &policy, std::size_t reps = 10000) {
+    policy.reset();
+    double avg = simulateExpectation(startb, pomdp, policy);
+
+    for (std::size_t i = 2; i <= reps; ++i) {
+        policy.reset();
+        const double newVal = simulateExpectation(startb, pomdp, policy);
+        avg = avg + (newVal - avg) / static_cast<double>(i);
+    }
+
+    return avg;
+}
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
