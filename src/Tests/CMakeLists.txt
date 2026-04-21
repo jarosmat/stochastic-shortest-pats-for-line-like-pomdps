@@ -5,7 +5,11 @@ set(CMAKE_CXX_STANDARD 23)
 
 include(CTest)
 
+add_executable(QuantifierTest quantifierTest.cpp)
+target_link_libraries(QuantifierTest Catch2::Catch2WithMain Quantifier Prob LinePOMDP Belief PeriodicPolicy)
+add_test(NAME QuantifierTest COMMAND QuantifierTest)
+
 
 include(Catch)
-catch_discover_tests()
+catch_discover_tests(QuantifierTest)
 
