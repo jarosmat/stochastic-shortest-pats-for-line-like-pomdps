@@ -1,9 +1,13 @@
 #ifndef INC_2026_JAROS_GOALPOMDP_HPP
 #define INC_2026_JAROS_GOALPOMDP_HPP
 #include <cstddef>
+#include <set>
 #include <vector>
 #include "prob.hpp"
 #include "belief.hpp"
+
+using state = std::size_t;
+using action = std::size_t;
 
 class costFunction {
     const std::size_t action_c;
@@ -47,6 +51,61 @@ public:
 
 template<typename CF, typename TF, typename OF>
 class goalPomdp {
+    std::size_t states;
+    belief initialBel;
+    std::set<std::size_t> targetStates;
+    std::size_t actions;
+    // vector indexed by actions
+    std::vector<TF> transitionProb;
+    CF c;
+    std::size_t observations;
+    // vector indexed by actions
+    std::vector<OF> observationProb;
+
+public:
+    template<typename CFC, typename TFC, typename OFC>
+    goalPomdp(belief &&initialBel, std::set<std::size_t> &&targets, const std::size_t actions,
+              std::vector<TFC> &&transitionProb, CFC &&c,
+              const std::size_t observations, std::vector<OFC> &&observationProb) : states(initialBel.bel.size()),
+        initialBel(std::move(initialBel)),
+        targetStates(std::move(targets)),
+        actions(actions),
+        transitionProb(
+            std::forward<TFC>(transitionProb)),
+        c(std::forward<CFC>(c)),
+        observations(observations),
+        observationProb(
+            std::forward<OFC>(observationProb)) {
+    }
+
+    belief UpdateBelief(belief &&bel, action action) const {
+    }
+
+    [[nodiscard]] belief UpdateBelief(const belief &bel, action action) const {
+    }
+
+    [[nodiscard]] belief SimulateAction(action action, state state) const {
+        belief res(states);
+        if (IsFinalState(state)) {
+            res[state] = prob(1.0);
+            return res;
+        }
+
+        TF &func = transitionProb[action];
+
+        for (std::size_t state_p = 0; state_p < states; ++state_p) {
+            res[state_p] = func(state_p, state);
+        }
+
+        return res;
+    }
+
+    [[nodiscard]] bool IsFinalState(const state state) const {
+        return targetStates.contains(state);
+    }
+
+    std::vector<prob> GetFinalStatesProbs(belief &&bel) const {
+    }
 };
 
 
