@@ -30,6 +30,22 @@ public:
     prob operator ()(std::size_t target, std::size_t start) const;
 };
 
+class observationProb {
+    std::size_t observation_c;
+    std::size_t state_c;
+
+    // represents a matrix with row i, represents probabilities of observing all observations upon entering state i
+    // when indexed, first index is state we entered and second is observation
+    std::vector<prob> probs;
+
+public:
+    observationProb(std::size_t observations, std::size_t states, std::vector<prob> &&probs);
+
+    prob operator ()(std::size_t observation, std::size_t state) const;
+};
+
+
+template<typename CF, typename TF, typename OF>
 class goalPomdp {
 };
 

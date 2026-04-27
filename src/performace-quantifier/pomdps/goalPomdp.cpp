@@ -15,3 +15,12 @@ transitionProb::transitionProb(const std::size_t states, std::vector<prob> &&pro
 prob transitionProb::operator()(const std::size_t target, const std::size_t start) const {
     return probs.at(start * state_c + target);
 }
+
+observationProb::observationProb(const std::size_t observations, const std::size_t states,
+                                 std::vector<prob> &&probs) : observation_c(observations), state_c(states),
+                                                              probs(std::move(probs)) {
+}
+
+prob observationProb::operator()(const std::size_t observation, const std::size_t state) const {
+    return probs.at(state * observation_c + observation);
+}
