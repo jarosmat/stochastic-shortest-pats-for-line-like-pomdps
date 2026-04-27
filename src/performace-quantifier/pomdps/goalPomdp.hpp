@@ -8,6 +8,7 @@
 
 using state = std::size_t;
 using action = std::size_t;
+using state_prob = std::pair<state, prob>;
 
 class costFunction {
     const std::size_t action_c;
@@ -104,7 +105,17 @@ public:
         return targetStates.contains(state);
     }
 
-    std::vector<prob> GetFinalStatesProbs(belief &&bel) const {
+    std::vector<state_prob> GetFinalStatesProbs(belief &&bel) const {
+        const auto size = targetStates.size();
+        std::vector<state_prob> res(size);
+
+        std::size_t i = 0;
+        for (auto &&ts: targetStates) {
+            res[i] = {ts, bel[ts]};
+            ++i;
+        }
+
+        return res;
     }
 };
 
