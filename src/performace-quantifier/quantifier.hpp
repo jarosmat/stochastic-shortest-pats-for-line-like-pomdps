@@ -3,13 +3,14 @@
 
 #include "prob.hpp"
 #include "belief.hpp"
+#include "goalPomdp.hpp"
 #include "lineLikePomdp.hpp"
 
 //this function is operating under the assumption, that sum of elements of probs is 1
 std::size_t sampleIndex(const std::vector<prob> &probs);
 
-template<typename IT>
-bool simulateThreshold(const belief &startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy) {
+template<typename IT, typename P>
+bool simulateThreshold(const belief &startb, const P &pomdp, std::size_t T, IT &policy) {
     auto state = sampleIndex(startb.bel);
     if (pomdp.IsFinalState(state)) {
         return true;
