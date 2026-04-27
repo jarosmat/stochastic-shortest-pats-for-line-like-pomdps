@@ -1,0 +1,9 @@
+#ifndef INC_2026_JAROS_GOALPOMDP_HPP
+#define INC_2026_JAROS_GOALPOMDP_HPP
+
+
+class goalPomdp {
+};
+
+
+#endif //INC_2026_JAROS_GOALPOMDP_HPP
