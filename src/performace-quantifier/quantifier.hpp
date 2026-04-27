@@ -43,8 +43,8 @@ prob quantifyThreshold_s(const belief &startb, const P &pomdp, const std::size_t
     return prob(static_cast<double>(count) / static_cast<double>(reps));
 }
 
-template<typename IT>
-std::vector<prob> quantifyThreshold_m(belief &&startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy) {
+template<typename IT, typename P>
+std::vector<prob> quantifyThreshold_m(belief &&startb, const P &pomdp, const std::size_t T, IT &policy) {
     if (T == 0) {
         return pomdp.GetFinalStatesProbs(std::move(startb));
     }
