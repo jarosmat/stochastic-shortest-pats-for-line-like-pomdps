@@ -1,7 +1,7 @@
 #ifndef INC_2026_JAROS_GOALPOMDP_HPP
 #define INC_2026_JAROS_GOALPOMDP_HPP
 #include <cstddef>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include "prob.hpp"
 #include "belief.hpp"
@@ -53,7 +53,7 @@ template<typename CF, typename TF, typename OF>
 class goalPomdp {
     std::size_t states;
     belief initialBel;
-    std::set<std::size_t> targetStates;
+    std::unordered_set<std::size_t> targetStates;
     std::size_t actions;
     // vector indexed by actions
     std::vector<TF> transitionProb;
@@ -64,7 +64,7 @@ class goalPomdp {
 
 public:
     template<typename CFC, typename TFC, typename OFC>
-    goalPomdp(belief &&initialBel, std::set<std::size_t> &&targets, const std::size_t actions,
+    goalPomdp(belief &&initialBel, std::unordered_set<std::size_t> &&targets, const std::size_t actions,
               std::vector<TFC> &&transitionProb, CFC &&c,
               const std::size_t observations, std::vector<OFC> &&observationProb) : states(initialBel.bel.size()),
         initialBel(std::move(initialBel)),
