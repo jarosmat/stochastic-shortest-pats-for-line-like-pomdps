@@ -78,14 +78,14 @@ std::size_t simulateExpectation(const belief &startb, const P &pomdp, IT &policy
     return count;
 }
 
-template<typename IT>
-double quantifyExpectation_s(const belief &startb, const lineLikePomdp &pomdp, IT &policy, std::size_t reps = 10000) {
+template<typename IT, typename P>
+double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy, const std::size_t reps = 10000) {
     policy.reset();
-    double avg = simulateExpectation(startb, pomdp, policy);
+    double avg = simulateExpectation<IT, P>(startb, pomdp, policy);
 
     for (std::size_t i = 2; i <= reps; ++i) {
         policy.reset();
-        const double newVal = simulateExpectation(startb, pomdp, policy);
+        const double newVal = simulateExpectation<IT, P>(startb, pomdp, policy);
         avg = avg + (newVal - avg) / static_cast<double>(i);
     }
 
