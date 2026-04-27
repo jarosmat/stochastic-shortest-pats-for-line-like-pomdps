@@ -61,7 +61,7 @@ std::vector<prob> quantifyThreshold_m(belief &&startb, const P &pomdp, const std
     return pomdp.GetFinalStatesProbs(std::move(interRes));
 }
 
-template<typename IT,typename P>
+template<typename IT, typename P>
 std::size_t simulateExpectation(const belief &startb, const P &pomdp, IT &policy) {
     std::size_t count = 0;
     auto state = sampleIndex(startb.bel);
