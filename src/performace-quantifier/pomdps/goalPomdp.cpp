@@ -7,3 +7,11 @@ costFunction::costFunction(std::vector<double> &&costs, const std::size_t action
 double costFunction::operator()(const std::size_t action, const std::size_t state) const {
     return costs.at(action * state_c + state);
 }
+
+transitionProb::transitionProb(const std::size_t states, std::vector<prob> &&probs) : state_c(states),
+    probs(std::move(probs)) {
+}
+
+prob transitionProb::operator()(const std::size_t target, const std::size_t start) const {
+    return probs.at(start * state_c + target);
+}

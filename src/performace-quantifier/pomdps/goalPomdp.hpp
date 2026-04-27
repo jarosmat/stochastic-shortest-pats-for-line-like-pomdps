@@ -18,6 +18,17 @@ public:
     double operator ()(std::size_t action, std::size_t state) const;
 };
 
+class transitionProb {
+    std::size_t state_c;
+    std::vector<prob> probs;
+
+public:
+    transitionProb(std::size_t states, std::vector<prob> &&probs);
+
+    // represents a matrix with row i, represents probabilities to end up in states from state i, after taking action this
+    // function is associated with
+    prob operator ()(std::size_t target, std::size_t start) const;
+};
 
 class goalPomdp {
 };
