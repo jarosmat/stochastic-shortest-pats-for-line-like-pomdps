@@ -29,13 +29,13 @@ bool simulateThreshold(const belief &startb, const P &pomdp, std::size_t T, IT &
     return false;
 }
 
-template<typename IT>
-prob quantifyThreshold_s(const belief &startb, const lineLikePomdp &pomdp, std::size_t T, IT &policy,
+template<typename IT, typename P>
+prob quantifyThreshold_s(const belief &startb, const P &pomdp, const std::size_t T, IT &policy,
                          const std::size_t reps = 10000) {
     std::size_t count = 0;
     for (std::size_t i = 0; i < reps; ++i) {
         policy.reset();
-        if (simulateThreshold(startb, pomdp, T, policy)) {
+        if (simulateThreshold<IT, P>(startb, pomdp, T, policy)) {
             ++count;
         }
     }
