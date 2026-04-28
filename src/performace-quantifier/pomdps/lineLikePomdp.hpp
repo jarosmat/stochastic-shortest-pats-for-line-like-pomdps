@@ -13,6 +13,7 @@ class lineLikePomdp {
 
     // probs_[i] is the probability to move from state i when in that state and when action i is played
     std::vector<prob> probs_;
+
 public:
     explicit lineLikePomdp(std::vector<prob> &&probs);
 
@@ -28,7 +29,9 @@ public:
 
     std::vector<prob> GetFinalStatesProbs(belief &&bel) const;
 
-    [[nodiscard]] double GetExpectedCost(const belief& belief, action a) const;
+    [[nodiscard]] double GetExpectedCost(const belief &belief, action a) const;
+
+    bool EndBelief(const belief &bel) const;
 };
 
 

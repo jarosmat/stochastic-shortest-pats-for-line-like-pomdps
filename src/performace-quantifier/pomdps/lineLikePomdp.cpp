@@ -60,3 +60,7 @@ std::vector<prob> lineLikePomdp::GetFinalStatesProbs(belief &&bel) const {
 double lineLikePomdp::GetExpectedCost(const belief &belief, action a) const {
     return 1.0 - static_cast<double>(belief[states - 1]);
 }
+
+bool lineLikePomdp::EndBelief(const belief &bel) const {
+    return bel[states - 1] == prob(1.0);
+}
