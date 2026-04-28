@@ -25,3 +25,7 @@ periodicPolicy::periodicPolicy(std::vector<std::size_t> &&vec): pol(std::move(ve
 
 periodicPolicy::periodicPolicy(const std::vector<std::size_t> &vec): pol(vec) {
 }
+
+std::size_t periodicPolicy::len() const {
+    return pol.size();
+}

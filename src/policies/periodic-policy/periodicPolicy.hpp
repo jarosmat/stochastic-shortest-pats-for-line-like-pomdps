@@ -22,6 +22,8 @@ public:
     explicit periodicPolicy(std::vector<std::size_t> &&vec);
 
     explicit periodicPolicy(const std::vector<std::size_t> &vec);
+
+    [[nodiscard]] std::size_t len() const;
 };
 
 
