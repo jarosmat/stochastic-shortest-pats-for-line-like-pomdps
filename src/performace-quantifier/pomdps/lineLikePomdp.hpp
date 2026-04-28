@@ -27,6 +27,8 @@ public:
     [[nodiscard]] bool IsFinalState(state state) const;
 
     std::vector<prob> GetFinalStatesProbs(belief &&bel) const;
+
+    [[nodiscard]] double GetExpectedCost(const belief& belief, action a) const;
 };
 
 
