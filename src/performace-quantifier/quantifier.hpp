@@ -4,7 +4,6 @@
 #include "prob.hpp"
 #include "belief.hpp"
 #include "goalPomdp.hpp"
-#include "lineLikePomdp.hpp"
 
 //this function is operating under the assumption, that sum of elements of probs is 1
 std::size_t sampleIndex(const std::vector<prob> &probs);
@@ -31,7 +30,7 @@ bool simulateThreshold(const belief &startb, const P &pomdp, std::size_t T, IT &
 
 template<typename IT, typename P>
 prob quantifyThreshold_s(const belief &startb, const P &pomdp, const std::size_t T, IT &policy,
-                         const std::size_t reps = 10000) {
+                         const std::size_t reps) {
     std::size_t count = 0;
     for (std::size_t i = 0; i < reps; ++i) {
         policy.reset();
@@ -41,6 +40,11 @@ prob quantifyThreshold_s(const belief &startb, const P &pomdp, const std::size_t
     }
 
     return prob(static_cast<double>(count) / static_cast<double>(reps));
+}
+
+template<typename IT, typename P>
+prob quantifyThreshold_s(const belief &startb, const P &pomdp, const std::size_t T, IT &policy) {
+    return quantifyThreshold_s<IT, P>(startb, pomdp, T, policy, 10000);
 }
 
 template<typename IT, typename P>
@@ -79,7 +83,7 @@ std::size_t simulateExpectation(const belief &startb, const P &pomdp, IT &policy
 }
 
 template<typename IT, typename P>
-double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy, const std::size_t reps = 10000) {
+double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy, const std::size_t reps) {
     policy.reset();
     double avg = simulateExpectation<IT, P>(startb, pomdp, policy);
 
@@ -90,5 +94,10 @@ double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy, c
     }
 
     return avg;
+}
+
+template<typename IT, typename P>
+double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy) {
+    return quantifyExpectation_s<IT, P>(startb, pomdp, policy, 10000);
 }
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
