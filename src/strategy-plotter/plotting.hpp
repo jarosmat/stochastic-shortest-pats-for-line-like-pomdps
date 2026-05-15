@@ -9,4 +9,9 @@ periodicPolicy getPolicy(const std::vector<std::size_t> &counts);
 
 std::vector<prob> plot_probs(std::vector<prob> &&probs, const std::size_t T);
 
+std::size_t max(const std::vector<prob> &vals);
+
+void plot_table(std::vector<prob> &&base_probs, std::vector<prob> &&table_probs, std::size_t T,
+                std::ostream &stream);
+
 #endif //INC_2026_JAROS_PLOTTING_HPP

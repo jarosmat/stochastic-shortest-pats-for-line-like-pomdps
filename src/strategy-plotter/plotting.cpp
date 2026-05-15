@@ -39,3 +39,49 @@ std::vector<prob> plot_probs(std::vector<prob> &&probs, const std::size_t T) {
 
     return res;
 }
+
+// returns index with maximum probability
+std::size_t max(const std::vector<prob>& vals) {
+    if (vals.empty()) {
+        return 0;
+    }
+    prob max_prob = vals[0];
+    std::size_t max = 0;
+
+    for (std::size_t i = 1; i < vals.size(); ++i) {
+        if (vals[i] >= max_prob) {
+            max_prob = vals[i];
+            max = i;
+        }
+    }
+
+    return max;
+}
+
+// plots table where base_probs are given, that will be used every time and table_probs is a set of probabilities,
+// whose cartesian product will be used as two last probabilities
+// horizontal row is the last probability, vertical row is the second last probability
+// In the table number of A instructions is showed
+void plot_table(std::vector<prob> &&base_probs, std::vector<prob> && table_probs, const std::size_t T, std::ostream& stream) {
+    const auto t_size = table_probs.size();
+
+    stream << '\t';
+    for (auto && p : table_probs) {
+        stream << "| " << p << " ";
+    }
+    stream << "|" << std::endl;
+
+
+    for (std::size_t i = 0; i < t_size; ++i) {
+        stream << table_probs[i] << " |  ";
+        for (std::size_t j = 0; j < t_size; ++j) {
+            auto probs_to_plot = base_probs;
+            probs_to_plot.push_back(table_probs[i]);
+            probs_to_plot.push_back(table_probs[j]);
+            auto res = plot_probs(std::move(probs_to_plot), T);
+            auto max_prob = max(res);
+            stream << max_prob + 1 << "  |  ";
+        }
+        stream << std::endl;
+    }
+}
