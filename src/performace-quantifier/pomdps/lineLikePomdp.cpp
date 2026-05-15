@@ -64,3 +64,7 @@ double lineLikePomdp::GetExpectedCost(const belief &belief, action a) const {
 bool lineLikePomdp::EndBelief(const belief &bel) const {
     return bel[states - 1] == prob(1.0);
 }
+
+bool lineLikePomdp::IsAtEndProb(const belief &bel, const prob prob) const {
+    return bel[states - 1] >= prob;
+}

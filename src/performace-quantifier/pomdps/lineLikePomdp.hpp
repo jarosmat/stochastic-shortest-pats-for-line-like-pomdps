@@ -32,6 +32,8 @@ public:
     [[nodiscard]] double GetExpectedCost(const belief &belief, action a) const;
 
     bool EndBelief(const belief &bel) const;
+
+    bool IsAtEndProb(const belief &bel, prob prob) const;
 };
 
 
