@@ -10,4 +10,4 @@ add_executable(plotter plotter.cpp)
 target_link_libraries(plotter PUBLIC plotting)
 
 add_executable(plot_table plot_table.cpp)
-target_link_libraries(plot_table PUBLIC LinePOMDP Quantifier PeriodicPolicy)
+target_link_libraries(plot_table PUBLIC plotting)
