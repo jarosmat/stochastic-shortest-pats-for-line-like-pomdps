@@ -15,6 +15,8 @@ periodicPolicy getPolicy(const std::vector<std::size_t> &counts) {
 
 std::vector<prob> plot_probs(std::vector<prob> &&probs, const std::size_t T) {
     const auto pomdp = lineLikePomdp(std::move(probs));
+    std::vector start_bel(pomdp.States(), prob(0));
+    start_bel[0] = prob(1);
 
     std::vector<prob> res(T - 1);
 
@@ -24,7 +26,7 @@ std::vector<prob> plot_probs(std::vector<prob> &&probs, const std::size_t T) {
         action_counts.push_back(T - i);
         auto policy = getPolicy(action_counts);
 
-        auto res_plot = quantifyThreshold_m(belief({prob(1), prob(0), prob(0)}), pomdp, T, policy);
+        auto res_plot = quantifyThreshold_m(belief(start_bel), pomdp, T, policy);
 
         res[i - 1] = res_plot[0];
     }
