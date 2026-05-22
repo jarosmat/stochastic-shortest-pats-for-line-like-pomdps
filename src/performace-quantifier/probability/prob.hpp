@@ -49,6 +49,8 @@ struct prob {
 
     friend double operator*(std::size_t other, prob p);
 
+    friend double operator/(double other, prob p);
+
 private:
     val_t val;
 };

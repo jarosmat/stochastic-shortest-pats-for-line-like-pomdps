@@ -80,3 +80,7 @@ std::ostream &operator<<(std::ostream &os, const prob &val) {
 double operator*(const std::size_t other, const prob p) {
     return p.val * other;
 }
+
+double operator/(const double other, const prob p) {
+    return other / p.val;
+}
