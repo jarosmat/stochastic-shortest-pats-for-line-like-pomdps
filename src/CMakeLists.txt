@@ -13,6 +13,14 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG        v3.4.0
 )
+
+find_package(VTK REQUIRED COMPONENTS
+        CommonCore
+        FiltersCore
+        RenderingCore
+        InteractionStyle
+)
+
 FetchContent_MakeAvailable(Catch2)
 
 
@@ -20,3 +28,14 @@ add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
 add_subdirectory("${POLICIES_DIR}")
+
+add_executable(plot main.cpp)
+target_link_libraries(plot PUBLIC)
+
+target_link_libraries(plot PRIVATE
+        ${VTK_LIBRARIES}
+        VTK
+)
+
+# Include VTK headers
+target_include_directories(plot PRIVATE ${VTK_INCLUDE_DIRS})
