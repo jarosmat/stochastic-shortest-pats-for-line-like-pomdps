@@ -69,6 +69,10 @@ bool lineLikePomdp::IsAtEndProb(const belief &bel, const prob prob) const {
     return bel[states - 1] >= prob;
 }
 
+prob lineLikePomdp::ProbAtEnd(const belief &bel) const {
+    return bel[states - 1];
+}
+
 std::size_t lineLikePomdp::States() const {
     return states;
 }
