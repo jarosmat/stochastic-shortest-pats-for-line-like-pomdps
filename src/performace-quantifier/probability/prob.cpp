@@ -76,3 +76,7 @@ prob max(const prob &a, const prob &b) {
 std::ostream &operator<<(std::ostream &os, const prob &val) {
     return os << val.val;
 }
+
+double operator*(const std::size_t other, const prob p) {
+    return p.val * other;
+}

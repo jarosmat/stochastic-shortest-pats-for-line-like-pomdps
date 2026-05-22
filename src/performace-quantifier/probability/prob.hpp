@@ -47,6 +47,8 @@ struct prob {
 
     friend std::ostream &operator<<(std::ostream &os, const prob &val);
 
+    friend double operator*(std::size_t other, prob p);
+
 private:
     val_t val;
 };
