@@ -34,6 +34,8 @@ public:
     bool EndBelief(const belief &bel) const;
 
     bool IsAtEndProb(const belief &bel, prob prob) const;
+
+    prob ProbAtEnd(const belief &bel) const;
 };
 
 
