@@ -19,10 +19,13 @@ int main() {
 
     constexpr std::size_t reps = 1000000;
     // auto res = quantifyThreshold_s(startB, pomdp, 10, policy);
-    auto res = quantifyExpectation_s(startB,pomdp,policy, reps);
+    // auto res = quantifyExpectation_s(startB,pomdp,policy, reps);
+    auto [res,res_exp] = quantify_steps_until_threshold_m<periodicPolicy, lineLikePomdp>(std::move(startB), pomdp, policy, prob(0.9));
     // for (auto &&a: res) {
     // auto res = quantifyThreshold_m(std::move(startB), pomdp, 10, policy)[0];
+    // auto res = quantify_steps_until_threshold_m<periodicPolicy, lineLikePomdp>(std::move(startB), pomdp, policy, prob(0.5));
     std::cout << res<< std::endl;
+    std::cout << res_exp << std::endl;
     // }
     return 0;
 }
