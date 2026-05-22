@@ -100,4 +100,27 @@ template<typename IT, typename P>
 double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy) {
     return quantifyExpectation_s<IT, P>(startb, pomdp, policy, 10000);
 }
+
+template<typename IT, typename P>
+std::pair<std::size_t, double> quantify_steps_until_threshold_m(belief &&startb, const P &pomdp, IT &policy, prob threshold) {
+    if (threshold == prob(0)) {
+        return {0,0};
+    }
+
+    auto inter_bel = std::move(startb);
+    double expectation = 0;
+    prob last_prob = pomdp.ProbAtEnd(inter_bel);
+
+    std::size_t res = 0;
+    for (;!pomdp.IsAtEndProb(inter_bel, threshold); ++res) {
+        action action = *policy;
+        inter_bel = pomdp.UpdateBelief(std::move(inter_bel), action);
+        prob new_prob = pomdp.ProbAtEnd(inter_bel);
+        expectation += (res + 1) * (new_prob - last_prob);
+        last_prob = new_prob;
+        ++policy;
+    }
+
+    return {res, expectation / threshold};
+}
 #endif //INC_2026_JAROS_QUANTIFIER_HPP
