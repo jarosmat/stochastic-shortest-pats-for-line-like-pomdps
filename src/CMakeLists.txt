@@ -15,9 +15,32 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+include(FetchContent)
+FetchContent_Declare(
+        matplotlib-cpp
+        GIT_REPOSITORY https://github.com/lava/matplotlib-cpp.git
+        GIT_TAG        master
+)
+FetchContent_MakeAvailable(matplotlib-cpp)
+
+
+execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
+        OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT NUMPY_INCLUDE_DIR)
+    message(FATAL_ERROR "NumPy headers not found. Install numpy: pip install numpy")
+endif()
+
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE Python3::Python)
+target_include_directories(my_app PRIVATE ${NUMPY_INCLUDE_DIR} ${matplotlib-cpp_SOURCE_DIR})
 
 add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
 add_subdirectory("${POLICIES_DIR}")
-
