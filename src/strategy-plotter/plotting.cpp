@@ -61,7 +61,7 @@ std::size_t max(const std::vector<prob>& vals) {
 // plots table where base_probs are given, that will be used every time and table_probs is a set of probabilities,
 // whose cartesian product will be used as two last probabilities
 // horizontal row is the last probability, vertical row is the second last probability
-// In the table number of A instructions is showed
+// In the table number of A instructions is shown
 void plot_table(std::vector<prob> &&base_probs, std::vector<prob> && table_probs, const std::size_t T, std::ostream& stream) {
     const auto t_size = table_probs.size();
 
