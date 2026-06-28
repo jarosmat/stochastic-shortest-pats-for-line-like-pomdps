@@ -11,3 +11,8 @@ target_link_libraries(plotter PUBLIC plotting)
 
 add_executable(plot_table plot_table.cpp)
 target_link_libraries(plot_table PUBLIC plotting)
+
+
+add_executable(contour_max_prob contour_max_prob.cpp)
+target_link_libraries(contour_max_prob PRIVATE Python3::Python plotting)
+target_include_directories(contour_max_prob PRIVATE ${NUMPY_INCLUDE_DIR} ${matplotlib-cpp_SOURCE_DIR})
