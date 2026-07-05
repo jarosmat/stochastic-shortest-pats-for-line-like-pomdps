@@ -101,6 +101,9 @@ double quantifyExpectation_s(const belief &startb, const P &pomdp, IT &policy) {
     return quantifyExpectation_s<IT, P>(startb, pomdp, policy, 10000);
 }
 
+// Calculates after how many actions taken with pomdp, startb and policy we will have probability at least threshold,
+// that we have reached end, returns pair, where first is the number of steps it took and second is the expectation of
+// how many steps it took with the condition that, the probability is at most threshold
 template<typename IT, typename P>
 std::pair<std::size_t, double> quantify_steps_until_threshold_m(belief &&startb, const P &pomdp, IT &policy, prob threshold) {
     if (threshold == prob(0)) {
