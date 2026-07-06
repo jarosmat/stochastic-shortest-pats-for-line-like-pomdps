@@ -2,6 +2,7 @@
 
 #include "matplotlibcpp.h"
 #include "plotting.hpp"
+#include <chrono>
 
 namespace plt = matplotlibcpp;
 
@@ -56,6 +57,71 @@ std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshol
         }
         queue.pop();
     }
+
+    return res;
+}
+
+double min_exp(const double exp, const prob at_end_p, const prob threshold, const std::size_t n_steps) {
+    if (at_end_p >= threshold) {
+        return exp;
+    }
+    return  exp + n_steps * (threshold - at_end_p);
+}
+
+bool too_high_exp(const double exp_to_comp ,const double exp, const prob at_end_p, const prob threshold, const std::size_t n_steps) {
+    return  exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
+}
+
+std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold, std::size_t time_cutoff = 10) {
+    auto start = std::chrono::steady_clock::now();
+    const lineLikePomdp pomdp({p1, p2});
+
+    std::vector start_v{prob(1), prob(0), prob(0)};
+    belief start_b(std::move(start_v));
+
+    std::queue<queue_e> queue;
+    queue.emplace("", std::move(start_b), 0, 0);
+
+    std::vector<queue_e> res;
+    while (!queue.empty()) {
+        auto [pol, bel, exp, stps] = std::move(queue.front());
+        queue.pop();
+        if (!res.empty()) {
+            auto end = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+            if (elapsed >= time_cutoff) {
+                return res;
+            }
+        }
+        if (!pomdp.IsAtEndProb(bel, threshold)) {
+            if (!res.empty() && too_high_exp(res.back().expectation, exp, pomdp.ProbAtEnd(bel), threshold, stps + 1)) {
+                continue;
+            }
+
+            auto pol_a{pol};
+            pol_a.push_back('A');
+            auto pol_b{std::move(pol)};
+            pol_b.push_back('B');
+
+            auto prob_end{pomdp.ProbAtEnd(bel)};
+
+            belief n_bel_a{pomdp.UpdateBelief(bel, 0)};
+            belief n_bel_b{pomdp.UpdateBelief(std::move(bel), 1)};
+
+            const auto new_steps{stps + 1};
+            double new_exp_a{exp + new_steps * (pomdp.ProbAtEnd(n_bel_a) - prob_end)};
+            double new_exp_b{exp + new_steps * (pomdp.ProbAtEnd(n_bel_b) - prob_end)};
+
+            queue.emplace(std::move(pol_a), std::move(n_bel_a), new_exp_a, new_steps);
+            queue.emplace(std::move(pol_b), std::move(n_bel_b), new_exp_b, new_steps);
+        }
+        else if (res.empty()) {
+            res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
+        } else if (res.back().expectation > exp / threshold) {
+            res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
+        }
+    }
+
 
     return res;
 }
