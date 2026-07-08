@@ -132,40 +132,82 @@ int main() {
     constexpr float grain = 0.1;
     constexpr float start_prob = 0.6;
     constexpr int colors = 1;
+    const prob threshold{0.5};
 
     std::vector<float> buffer(rows * cols * colors);
-
+    std::unordered_map<std::string, std::size_t> strategy_map;
+    std::size_t curr_strategy_index{0};
+    std::vector<std::string> unique_labels;
     for (int j = 0; j < rows; ++j) {
         for (int i = 0; i < cols; ++i) {
             const std::size_t index = j * cols + i;
             std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
-            auto res = plot_probs(std::move(probs_to_plot), 10);
-            const auto max_prob = max(res);
-            buffer[index] = static_cast<float>(max_prob + 1);
+            auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
+            auto strategy{vals.back().policy};
+            auto lookup = strategy_map.find(strategy);
+            if (lookup != strategy_map.end()) {
+                buffer[index] = static_cast<float>(lookup->second);
+            }
+            else {
+                strategy_map.insert({strategy, curr_strategy_index});
+                unique_labels.push_back(std::move(strategy));
+                buffer[index] = static_cast<float>(curr_strategy_index);
+                ++curr_strategy_index;
+            }
         }
     }
 
-    PyObject *plot_output = nullptr;
-    plt::imshow(buffer.data(), rows, cols, colors, {}, &plot_output);
+    std::map<std::string, std::string> keywords;
+    keywords["cmap"] = "turbo";
+    keywords["interpolation"] = "none";
+    keywords["vmin"] = "0";
+    keywords["vmax"] = std::to_string(curr_strategy_index - 1);
 
+    PyObject *plot_output = nullptr;
+    plt::imshow(buffer.data(), rows, cols, colors, keywords, &plot_output);
     plt::colorbar(plot_output);
+
+    PyObject* pyplot_module = PyImport_ImportModule("matplotlib.pyplot");
+    if (pyplot_module) {
+        PyObject* gci_func = PyObject_GetAttrString(pyplot_module, "gci");
+        if (gci_func) {
+            PyObject* current_image = PyObject_CallNoArgs(gci_func);
+            if (current_image) {
+                PyObject* cbar = PyObject_GetAttrString(current_image, "colorbar");
+                if (cbar) {
+                    PyObject* ticks_py = PyList_New(static_cast<long>(curr_strategy_index));
+                    PyObject* labels_py = PyList_New(static_cast<long>(curr_strategy_index));
+
+                    for (int k = 0; k < curr_strategy_index; ++k) {
+                        PyList_SetItem(ticks_py, k, PyFloat_FromDouble(k));
+                        PyList_SetItem(labels_py, k, PyString_FromString(unique_labels[k].c_str()));
+                    }
+
+                    PyObject* res1 = PyObject_CallMethod(cbar, "set_ticks", "O", ticks_py);
+                    PyObject* res2 = PyObject_CallMethod(cbar, "set_ticklabels", "O", labels_py);
+
+                    if (res1) Py_DECREF(res1);
+                    if (res2) Py_DECREF(res2);
+                    Py_DECREF(ticks_py);
+                    Py_DECREF(labels_py);
+                    Py_DECREF(cbar);
+                }
+                Py_DECREF(current_image);
+            }
+            Py_DECREF(gci_func);
+        }
+        Py_DECREF(pyplot_module);
+    }
+
     std::vector<double> ticks;
     ticks.reserve(9);
     constexpr auto len{1 /(grain * 10)};
     for (auto i{1}, j{1}; i <= 9; ++i) {
-        std::cout << i << std::endl;
-        std::cout << 0.1*i << " | " << start_prob << " | " << (static_cast<float>(0.1 * i) >= start_prob) << std::endl;
         if (static_cast<float>(0.1 * i) >= start_prob) {
             ticks.push_back(j * len - 1);
             ++j;
         }
     }
-
-    for (auto && a : ticks) {
-        std::cout << a << " ";
-    }
-    std::cout << std::endl;
-
 
     const std::vector<std::string> labels_strings = {"0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"};
     std::vector<std::string> labels;
