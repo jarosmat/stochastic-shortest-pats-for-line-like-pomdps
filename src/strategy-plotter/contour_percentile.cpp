@@ -145,6 +145,59 @@ void rem_suffix(std::string& s) {
     }
 }
 
+class plain_filler {
+    std::unordered_map<std::string, std::size_t> strategy_map_;
+    std::size_t curr_strategy_index_{0};
+    std::vector<std::string> unique_labels_;
+public:
+    float get_index(std::string&& strat) {
+        if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
+            return static_cast<float>(lookup->second);
+        }
+            strategy_map_.insert({strat, curr_strategy_index_});
+            unique_labels_.push_back(std::move(strat));
+            return static_cast<float>(curr_strategy_index_++);
+            // ++curr_strategy_index;
+    }
+};
+
+
+class trail_b_less_filler {
+    std::unordered_map<std::string, std::size_t> strategy_map_;
+    std::size_t curr_strategy_index_{0};
+    std::vector<std::string> unique_labels_;
+public:
+    float get_index(std::string&& strat) {
+        rem_suffix(strat);
+        if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
+            return static_cast<float>(lookup->second);
+        }
+        strategy_map_.insert({strat, curr_strategy_index_});
+        unique_labels_.push_back(std::move(strat));
+        return static_cast<float>(curr_strategy_index_++);
+        // ++curr_strategy_index;
+    }
+};
+
+template<typename T>
+std::vector<float> fill_buffer(std::size_t rows, std::size_t cols, float grain, float start_prob, int colors, prob threshold) {
+    std::vector<float> buffer(rows * cols * colors);
+    T indexer;
+    for (int j{0}; j < rows; ++j) {
+        for (int i{0}; i < cols; ++i) {
+            const std::size_t index{j * cols + i};
+            std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
+            auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
+            auto strategy{vals.back().policy};
+            // rem_suffix(strategy);
+            const float value{indexer.get_index(std::move(strategy))};
+            buffer[index] = value;
+        }
+    }
+
+    return buffer;
+}
+
 int main() {
     constexpr int rows = 9;
     constexpr int cols = 9;
