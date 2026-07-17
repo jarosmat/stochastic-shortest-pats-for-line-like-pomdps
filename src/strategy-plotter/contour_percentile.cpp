@@ -2,6 +2,7 @@
 
 #include "matplotlibcpp.h"
 #include "plotting.hpp"
+#include "quantifier.hpp"
 #include <chrono>
 
 namespace plt = matplotlibcpp;
@@ -90,6 +91,7 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
             auto end = std::chrono::steady_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
             if (elapsed >= time_cutoff) {
+                std::cout << "Probabilities: "  << p1 << " and " << p2 << ", took: " << stps << '\n';
                 return res;
             }
         }
@@ -126,13 +128,20 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
     return res;
 }
 
+void rem_suffix(std::string& s) {
+    while (!s.empty() && s.back() == 'B') {
+        s.pop_back();
+    }
+}
+
 int main() {
-    constexpr int rows = 4;
-    constexpr int cols = 4;
+    constexpr int rows = 9;
+    constexpr int cols = 9;
     constexpr float grain = 0.1;
-    constexpr float start_prob = 0.6;
+    constexpr float start_prob = 0.1;
     constexpr int colors = 1;
-    const prob threshold{0.5};
+    constexpr double threshold_val{0.5};
+    const prob threshold{threshold_val};
 
     std::vector<float> buffer(rows * cols * colors);
     std::unordered_map<std::string, std::size_t> strategy_map;
@@ -143,7 +152,8 @@ int main() {
             const std::size_t index = j * cols + i;
             std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
             auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
-            auto strategy{vals.back().policy};
+            auto strategy{vals.front().policy};
+            rem_suffix(strategy);
             auto lookup = strategy_map.find(strategy);
             if (lookup != strategy_map.end()) {
                 buffer[index] = static_cast<float>(lookup->second);
@@ -222,6 +232,7 @@ int main() {
     plt::yticks(ticks, labels);
     plt::xlabel("Second prob");
     plt::ylabel("First prob");
+    plt::title("Percentile: " + std::to_string(threshold_val) + ", podle delek strategii, prioritizujeme delku strategie");
     plt::show();
     return 0;
 }
