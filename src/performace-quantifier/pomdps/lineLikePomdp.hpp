@@ -38,12 +38,6 @@ public:
     bool IsAtEndProb(const belief &bel, prob prob) const;
 
     prob ProbAtEnd(const belief &bel) const;
-
-    std::size_t States() const;
-
-    bool IsAtEndProb(const belief &bel, prob prob) const;
-
-    prob ProbAtEnd(const belief &bel) const;
 };
 
 
