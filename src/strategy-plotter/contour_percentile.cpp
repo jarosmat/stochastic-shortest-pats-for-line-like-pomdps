@@ -25,7 +25,7 @@ std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshol
     queue.emplace("", std::move(start_b), 0, 0);
 
     while (!pomdp.IsAtEndProb(queue.front().bel, threshold)) {
-        auto [pol, bel, exp, stps] = std::move(queue.front());
+        auto [pol, bel, exp, steps] = std::move(queue.front());
         queue.pop();
         auto pol_a{pol};
         pol_a.push_back('A');
@@ -37,7 +37,7 @@ std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshol
         belief n_bel_a{pomdp.UpdateBelief(bel, 0)};
         belief n_bel_b{pomdp.UpdateBelief(std::move(bel), 1)};
 
-        const auto new_steps{stps + 1};
+        const auto new_steps{steps + 1};
         double new_exp_a{exp + new_steps * (pomdp.ProbAtEnd(n_bel_a) - prob_end)};
         double new_exp_b{exp + new_steps * (pomdp.ProbAtEnd(n_bel_b) - prob_end)};
 
@@ -62,6 +62,11 @@ std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshol
     return res;
 }
 
+// Computes minimal expectation that may be achieved with current probability [at_end_prob] exp amassed after [n_steps] - 1
+// and [threshold]
+// in short it just computes the amount, that needs to be added to last state probability, before there is threshold probability
+// and multiplies it with [n_steps]
+// exp is expected to not being normalized with threshold and return value is not normalized with threshold as well
 double min_exp(const double exp, const prob at_end_p, const prob threshold, const std::size_t n_steps) {
     if (at_end_p >= threshold) {
         return exp;
@@ -69,6 +74,12 @@ double min_exp(const double exp, const prob at_end_p, const prob threshold, cons
     return  exp + n_steps * (threshold - at_end_p);
 }
 
+// returns true iff minimal result expectation can be achieved from [exp], that was achieved after [n_steps] - 1 steps,
+// with [threshold] and probability, that we have reached the end being [at_end_p], is greater, than already found expectation
+// [exp_to_comp]
+// in short it just computes the amount, that needs to be added to last state probability, before there is threshold probability
+// and multiplies it with [n_steps] and checks if it is greater than [exp_to_comp]
+// exp is expected to not being normalized with threshold and return value is not normalized with threshold as well
 bool too_high_exp(const double exp_to_comp ,const double exp, const prob at_end_p, const prob threshold, const std::size_t n_steps) {
     return  exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
 }
@@ -152,7 +163,7 @@ int main() {
             const std::size_t index = j * cols + i;
             std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
             auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
-            auto strategy{vals.front().policy};
+            auto strategy{vals.back().policy};
             rem_suffix(strategy);
             auto lookup = strategy_map.find(strategy);
             if (lookup != strategy_map.end()) {
@@ -211,10 +222,10 @@ int main() {
 
     std::vector<double> ticks;
     ticks.reserve(9);
-    constexpr auto len{1 /(grain * 10)};
+    constexpr double len{1 /(grain * 10)};
     for (auto i{1}, j{1}; i <= 9; ++i) {
         if (static_cast<float>(0.1 * i) >= start_prob) {
-            ticks.push_back(j * len - 1);
+            ticks.push_back(static_cast<double>(j) * len - 1);
             ++j;
         }
     }

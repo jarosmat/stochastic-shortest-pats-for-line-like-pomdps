@@ -12,15 +12,15 @@ int main(const int argc, char *argv[]) {
     }
 
     const auto &file = args[0];
-    auto T = std::stoull(args[1]);
+    auto t = std::stoull(args[1]);
     auto dim = std::stoull(args[2]);
     if (dim < 2) {
         std::cerr << "Invalid dimension, must be greater than one" << std::endl;
         return -1;
     }
 
-    std::ifstream inputFile(file);
-    if (!inputFile.is_open()) {
+    std::ifstream input_file(file);
+    if (!input_file.is_open()) {
         std::cerr << "Failed to open the file." << std::endl;
         return 1;
     }
@@ -28,7 +28,7 @@ int main(const int argc, char *argv[]) {
     std::vector<prob> probs;
 
     std::string line;
-    while (std::getline(inputFile, line)) {
+    while (std::getline(input_file, line)) {
         std::istringstream iss(line);
         double num;
         iss >> num;
@@ -36,7 +36,7 @@ int main(const int argc, char *argv[]) {
     }
 
     if (dim == 2) {
-        plot_table({}, std::move(probs), T, std::cout);
+        plot_table({}, std::move(probs), t, std::cout);
     } else {
         // TODO implement
     }

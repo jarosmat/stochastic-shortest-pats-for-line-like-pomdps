@@ -11,10 +11,10 @@ int main(int argc, char *argv[]) {
     }
 
     const auto &file = args[0];
-    auto T = std::stoull(args[1]);
+    auto t = std::stoull(args[1]);
 
-    std::ifstream inputFile(file);
-    if (!inputFile.is_open()) {
+    std::ifstream input_file(file);
+    if (!input_file.is_open()) {
         std::cerr << "Failed to open the file." << std::endl;
         return 1;
     }
@@ -22,35 +22,35 @@ int main(int argc, char *argv[]) {
     std::cout << "Probs" << std::endl;
 
     std::string line;
-    while (std::getline(inputFile, line)) {
+    while (std::getline(input_file, line)) {
         std::istringstream iss(line);
         double num1, num2;
         iss >> num1 >> num2;
         auto num_p1 = prob(num1);
         auto num_p2 = prob(num2);
 
-        auto res = plot_probs({num_p1, num_p2}, T);
+        auto res = plot_probs({num_p1, num_p2}, t);
 
         std::cout << num1 << ", " << num2 << "\t|\t";
 
-        prob max = prob(0);
-        std::size_t maxI = 1;
+        auto max = prob(0);
+        std::size_t max_i = 1;
         std::size_t i = 1;
         for (auto &&plot: res) {
             if (plot > max) {
                 max = plot;
-                maxI = i;
+                max_i = i;
             }
             std::cout << plot << "\t|\t";
             ++i;
         }
 
-        std::cout << "max probability at " << maxI << " A instructions, with value: " << max << std::endl;
+        std::cout << "max probability at " << max_i << " A instructions, with value: " << max << std::endl;
 
         // std::cout << std::endl;
     }
 
-    inputFile.close();
+    input_file.close();
 
     return 0;
 }
