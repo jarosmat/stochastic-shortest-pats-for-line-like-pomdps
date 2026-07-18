@@ -199,17 +199,17 @@ public:
 };
 
 template<typename T>
-std::vector<float> fill_buffer(std::size_t rows, std::size_t cols, float grain, float start_prob, int colors, prob threshold) {
-    std::vector<float> buffer(rows * cols * colors);
-    T indexer;
+requires (!std::is_reference_v<T>)
+std::vector<float> fill_buffer(T& indexer , const std::size_t rows, const std::size_t cols, const float grain, const float start_prob, const prob threshold) {
+    std::vector<float> buffer(rows * cols);
     for (int j{0}; j < rows; ++j) {
         for (int i{0}; i < cols; ++i) {
             const std::size_t index{j * cols + i};
             std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
             auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
             auto strategy{vals.back().policy};
-            // rem_suffix(strategy);
             const float value{indexer.get_index(std::move(strategy))};
+            std::cout << value << std::endl;
             buffer[index] = value;
         }
     }
@@ -226,29 +226,11 @@ int main() {
     constexpr double threshold_val{0.5};
     const prob threshold{threshold_val};
 
-    std::vector<float> buffer(rows * cols * colors);
-    std::unordered_map<std::string, std::size_t> strategy_map;
-    std::size_t curr_strategy_index{0};
-    std::vector<std::string> unique_labels;
-    for (int j = 0; j < rows; ++j) {
-        for (int i = 0; i < cols; ++i) {
-            const std::size_t index = j * cols + i;
-            std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
-            auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
-            auto strategy{vals.back().policy};
-            rem_suffix(strategy);
-            auto lookup = strategy_map.find(strategy);
-            if (lookup != strategy_map.end()) {
-                buffer[index] = static_cast<float>(lookup->second);
-            }
-            else {
-                strategy_map.insert({strategy, curr_strategy_index});
-                unique_labels.push_back(std::move(strategy));
-                buffer[index] = static_cast<float>(curr_strategy_index);
-                ++curr_strategy_index;
-            }
-        }
-    }
+
+    plain_filler filler;
+    std::vector buffer{fill_buffer(filler, rows, cols, grain, start_prob, threshold)};
+    auto& [strategy_map, curr_strategy_index, unique_labels]{filler};
+
 
     std::map<std::string, std::string> keywords;
     keywords["cmap"] = "turbo";
