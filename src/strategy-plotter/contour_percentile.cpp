@@ -148,19 +148,36 @@ void rem_suffix(std::string& s) {
     }
 }
 
-class plain_filler {
+template<typename F>
+class filler {
     std::unordered_map<std::string, std::size_t> strategy_map_;
     std::size_t curr_strategy_index_{0};
     std::vector<std::string> unique_labels_;
+    F transformer_;
 public:
     float get_index(std::string&& strat) {
+        transformer_(strat);
         if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
             return static_cast<float>(lookup->second);
         }
-            strategy_map_.insert({strat, curr_strategy_index_});
-            unique_labels_.push_back(std::move(strat));
-            return static_cast<float>(curr_strategy_index_++);
-            // ++curr_strategy_index;
+        strategy_map_.insert({strat, curr_strategy_index_});
+        unique_labels_.push_back(std::move(strat));
+        return static_cast<float>(curr_strategy_index_++);
+        // ++curr_strategy_index;
+    }
+};
+
+struct plain_filler {
+    std::unordered_map<std::string, std::size_t> strategy_map;
+    std::size_t curr_strategy_index{0};
+    std::vector<std::string> unique_labels;
+    float get_index(std::string&& strat) {
+        if (const auto lookup = strategy_map.find(strat); lookup != strategy_map.end()) {
+            return static_cast<float>(lookup->second);
+        }
+            strategy_map.insert({strat, curr_strategy_index});
+            unique_labels.push_back(std::move(strat));
+            return static_cast<float>(curr_strategy_index++);
     }
 };
 
@@ -178,7 +195,6 @@ public:
         strategy_map_.insert({strat, curr_strategy_index_});
         unique_labels_.push_back(std::move(strat));
         return static_cast<float>(curr_strategy_index_++);
-        // ++curr_strategy_index;
     }
 };
 
