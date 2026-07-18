@@ -7,6 +7,8 @@
 
 namespace plt = matplotlibcpp;
 
+constexpr char s_instr{'B'};
+
 struct queue_e {
     std::string policy;
     belief bel;
@@ -139,8 +141,9 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
     return res;
 }
 
+template<char I>
 void rem_suffix(std::string& s) {
-    while (!s.empty() && s.back() == 'B') {
+    while (!s.empty() && s.back() == I) {
         s.pop_back();
     }
 }
@@ -168,7 +171,7 @@ class trail_b_less_filler {
     std::vector<std::string> unique_labels_;
 public:
     float get_index(std::string&& strat) {
-        rem_suffix(strat);
+        rem_suffix<s_instr>(strat);
         if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
             return static_cast<float>(lookup->second);
         }
