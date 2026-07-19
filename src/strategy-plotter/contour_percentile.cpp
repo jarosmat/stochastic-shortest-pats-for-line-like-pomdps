@@ -87,8 +87,9 @@ bool too_high_exp(const double exp_to_comp, const double exp, const prob at_end_
     return exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
 }
 
-bool valid_bel(const belief& bel) {
-    return std::to_string(static_cast<double>(bel[0])) != std::to_string(0.5)  || std::to_string(static_cast<double>(bel[2])) != std::to_string(0.5);
+bool valid_bel(const belief &bel) {
+    return std::to_string(static_cast<double>(bel[0])) != std::to_string(0.5) || std::to_string(
+               static_cast<double>(bel[2])) != std::to_string(0.5);
 }
 
 std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold,
@@ -216,7 +217,6 @@ std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::si
             auto vals{plotter_func(probs_to_plot[0], probs_to_plot[1], threshold)};
             auto strategy{vals.back().policy};
             const float value{indexer.get_index(std::move(strategy))};
-            std::cout << value << std::endl;
             buffer[index] = value;
         }
     }
