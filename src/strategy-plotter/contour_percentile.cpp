@@ -54,9 +54,9 @@ std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshol
     res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
 
     while (!queue.empty() && queue.front().steps == stps) {
-        auto [poln, beln, expn, stpsn] = std::move(queue.front());
-        if (pomdp.IsAtEndProb(beln, threshold)) {
-            res.emplace_back(std::move(poln), std::move(beln), expn / threshold, stps);
+        if (auto [pol_n, bel_n, exp_n, steps_n] = std::move(queue.front());
+            pomdp.IsAtEndProb(bel_n, threshold) && exp_n / threshold < res.back().expectation) {
+            res.emplace_back(std::move(pol_n), std::move(bel_n), exp_n / threshold, stps);
         }
         queue.pop();
     }
@@ -73,7 +73,7 @@ double min_exp(const double exp, const prob at_end_p, const prob threshold, cons
     if (at_end_p >= threshold) {
         return exp;
     }
-    return  exp + n_steps * (threshold - at_end_p);
+    return exp + n_steps * (threshold - at_end_p);
 }
 
 // returns true iff minimal result expectation can be achieved from [exp], that was achieved after [n_steps] - 1 steps,
@@ -82,11 +82,13 @@ double min_exp(const double exp, const prob at_end_p, const prob threshold, cons
 // in short it just computes the amount, that needs to be added to last state probability, before there is threshold probability
 // and multiplies it with [n_steps] and checks if it is greater than [exp_to_comp]
 // exp is expected to not being normalized with threshold and return value is not normalized with threshold as well
-bool too_high_exp(const double exp_to_comp ,const double exp, const prob at_end_p, const prob threshold, const std::size_t n_steps) {
-    return  exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
+bool too_high_exp(const double exp_to_comp, const double exp, const prob at_end_p, const prob threshold,
+                  const std::size_t n_steps) {
+    return exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
 }
 
-std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold, std::size_t time_cutoff = 10) {
+std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold,
+                                         std::size_t time_cutoff = 10) {
     auto start = std::chrono::steady_clock::now();
     const lineLikePomdp pomdp({p1, p2});
 
@@ -102,9 +104,9 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
         queue.pop();
         if (!res.empty()) {
             auto end = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-            if (elapsed >= time_cutoff) {
-                std::cout << "Probabilities: "  << p1 << " and " << p2 << ", took: " << stps << '\n';
+            if (auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+                elapsed >= time_cutoff) {
+                std::cout << "Probabilities: " << p1 << " and " << p2 << ", took: " << stps << '\n';
                 return res;
             }
         }
@@ -129,10 +131,7 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
 
             queue.emplace(std::move(pol_a), std::move(n_bel_a), new_exp_a, new_steps);
             queue.emplace(std::move(pol_b), std::move(n_bel_b), new_exp_b, new_steps);
-        }
-        else if (res.empty()) {
-            res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
-        } else if (res.back().expectation > exp / threshold) {
+        } else if (res.empty() || res.back().expectation > exp / threshold) {
             res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
         }
     }
@@ -142,7 +141,7 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
 }
 
 template<char I>
-void rem_suffix(std::string& s) {
+void rem_suffix(std::string &s) {
     while (!s.empty() && s.back() == I) {
         s.pop_back();
     }
@@ -154,8 +153,9 @@ class filler {
     std::size_t curr_strategy_index_{0};
     std::vector<std::string> unique_labels_;
     F transformer_;
+
 public:
-    float get_index(std::string&& strat) {
+    float get_index(std::string &&strat) {
         transformer_(strat);
         if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
             return static_cast<float>(lookup->second);
@@ -163,7 +163,6 @@ public:
         strategy_map_.insert({strat, curr_strategy_index_});
         unique_labels_.push_back(std::move(strat));
         return static_cast<float>(curr_strategy_index_++);
-        // ++curr_strategy_index;
     }
 };
 
@@ -171,30 +170,31 @@ struct plain_filler {
     std::unordered_map<std::string, std::size_t> strategy_map;
     std::size_t curr_strategy_index{0};
     std::vector<std::string> unique_labels;
-    float get_index(std::string&& strat) {
+
+    float get_index(std::string &&strat) {
         if (const auto lookup = strategy_map.find(strat); lookup != strategy_map.end()) {
             return static_cast<float>(lookup->second);
         }
-            strategy_map.insert({strat, curr_strategy_index});
-            unique_labels.push_back(std::move(strat));
-            return static_cast<float>(curr_strategy_index++);
+        strategy_map.insert({strat, curr_strategy_index});
+        unique_labels.push_back(std::move(strat));
+        return static_cast<float>(curr_strategy_index++);
     }
 };
 
 
-class trail_b_less_filler {
-    std::unordered_map<std::string, std::size_t> strategy_map_;
-    std::size_t curr_strategy_index_{0};
-    std::vector<std::string> unique_labels_;
-public:
-    float get_index(std::string&& strat) {
+struct trail_b_less_filler {
+    std::unordered_map<std::string, std::size_t> strategy_map;
+    std::size_t curr_strategy_index{0};
+    std::vector<std::string> unique_labels;
+
+    float get_index(std::string &&strat) {
         rem_suffix<s_instr>(strat);
-        if (const auto lookup = strategy_map_.find(strat); lookup != strategy_map_.end()) {
+        if (const auto lookup = strategy_map.find(strat); lookup != strategy_map.end()) {
             return static_cast<float>(lookup->second);
         }
-        strategy_map_.insert({strat, curr_strategy_index_});
-        unique_labels_.push_back(std::move(strat));
-        return static_cast<float>(curr_strategy_index_++);
+        strategy_map.insert({strat, curr_strategy_index});
+        unique_labels.push_back(std::move(strat));
+        return static_cast<float>(curr_strategy_index++);
     }
 };
 
@@ -231,10 +231,11 @@ int main() {
 
 
     plain_filler filler;
-    std::vector buffer{
-        fill_buffer(filler, rows, cols, grain, start_prob, threshold, [](prob p1, prob p2, prob threshold) {
-            return plot_percentile_max(p1, p2, threshold);
-        })
+    const std::vector buffer{
+        fill_buffer(filler, rows, cols, grain, start_prob, threshold,
+                    [](const prob p1, const prob p2, const prob thr) {
+                        return plot_percentile_max(p1, p2, thr);
+                    })
     };
     auto &[strategy_map, curr_strategy_index, unique_labels]{filler};
 
@@ -249,27 +250,25 @@ int main() {
     plt::imshow(buffer.data(), rows, cols, colors, keywords, &plot_output);
     plt::colorbar(plot_output);
 
-    PyObject* pyplot_module = PyImport_ImportModule("matplotlib.pyplot");
-    if (pyplot_module) {
-        PyObject* gci_func = PyObject_GetAttrString(pyplot_module, "gci");
-        if (gci_func) {
-            PyObject* current_image = PyObject_CallNoArgs(gci_func);
-            if (current_image) {
-                PyObject* cbar = PyObject_GetAttrString(current_image, "colorbar");
-                if (cbar) {
-                    PyObject* ticks_py = PyList_New(static_cast<long>(curr_strategy_index));
-                    PyObject* labels_py = PyList_New(static_cast<long>(curr_strategy_index));
+    if (PyObject *pyplot_module = PyImport_ImportModule("matplotlib.pyplot")) {
+        if (PyObject *gci_func = PyObject_GetAttrString(pyplot_module, "gci")) {
+            if (PyObject *current_image = PyObject_CallNoArgs(gci_func)) {
+                if (PyObject *cbar = PyObject_GetAttrString(current_image, "colorbar")) {
+                    PyObject *ticks_py = PyList_New(static_cast<long>(curr_strategy_index));
+                    PyObject *labels_py = PyList_New(static_cast<long>(curr_strategy_index));
 
                     for (int k = 0; k < curr_strategy_index; ++k) {
                         PyList_SetItem(ticks_py, k, PyFloat_FromDouble(k));
                         PyList_SetItem(labels_py, k, PyString_FromString(unique_labels[k].c_str()));
                     }
 
-                    PyObject* res1 = PyObject_CallMethod(cbar, "set_ticks", "O", ticks_py);
-                    PyObject* res2 = PyObject_CallMethod(cbar, "set_ticklabels", "O", labels_py);
+                    PyObject *res1 = PyObject_CallMethod(cbar, "set_ticks", "O", ticks_py);
+                    PyObject *res2 = PyObject_CallMethod(cbar, "set_ticklabels", "O", labels_py);
 
-                    if (res1) Py_DECREF(res1);
-                    if (res2) Py_DECREF(res2);
+                    if (res1)
+                        Py_DECREF(res1);
+                    if (res2)
+                        Py_DECREF(res2);
                     Py_DECREF(ticks_py);
                     Py_DECREF(labels_py);
                     Py_DECREF(cbar);
@@ -283,7 +282,7 @@ int main() {
 
     std::vector<double> ticks;
     ticks.reserve(9);
-    constexpr double len{1 /(grain * 10)};
+    constexpr double len{1 / (grain * 10)};
     for (auto i{1}, j{1}; i <= 9; ++i) {
         if (static_cast<float>(0.1 * i) >= start_prob) {
             ticks.push_back(static_cast<double>(j) * len - 1);
@@ -304,7 +303,8 @@ int main() {
     plt::yticks(ticks, labels);
     plt::xlabel("Second prob");
     plt::ylabel("First prob");
-    plt::title("Percentile: " + std::to_string(threshold_val) + ", podle delek strategii, prioritizujeme delku strategie");
+    plt::title(
+        "Percentile: " + std::to_string(threshold_val) + ", podle delek strategii, prioritizujeme delku strategie");
     plt::show();
     return 0;
 }
