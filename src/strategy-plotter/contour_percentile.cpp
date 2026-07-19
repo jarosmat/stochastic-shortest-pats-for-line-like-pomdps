@@ -199,14 +199,17 @@ public:
 };
 
 template<typename T>
-requires (!std::is_reference_v<T>)
-std::vector<float> fill_buffer(T& indexer , const std::size_t rows, const std::size_t cols, const float grain, const float start_prob, const prob threshold) {
+    requires (!std::is_reference_v<T>)
+std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::size_t cols, const float grain,
+                               const float start_prob, const prob threshold, auto plotter_func) {
     std::vector<float> buffer(rows * cols);
     for (int j{0}; j < rows; ++j) {
         for (int i{0}; i < cols; ++i) {
             const std::size_t index{j * cols + i};
-            std::vector probs_to_plot{prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}};
-            auto vals{plot_percentile_max(probs_to_plot[0], probs_to_plot[1], threshold)};
+            std::vector probs_to_plot{
+                prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}
+            };
+            auto vals{plotter_func(probs_to_plot[0], probs_to_plot[1], threshold)};
             auto strategy{vals.back().policy};
             const float value{indexer.get_index(std::move(strategy))};
             std::cout << value << std::endl;
@@ -228,8 +231,12 @@ int main() {
 
 
     plain_filler filler;
-    std::vector buffer{fill_buffer(filler, rows, cols, grain, start_prob, threshold)};
-    auto& [strategy_map, curr_strategy_index, unique_labels]{filler};
+    std::vector buffer{
+        fill_buffer(filler, rows, cols, grain, start_prob, threshold, [](prob p1, prob p2, prob threshold) {
+            return plot_percentile_max(p1, p2, threshold);
+        })
+    };
+    auto &[strategy_map, curr_strategy_index, unique_labels]{filler};
 
 
     std::map<std::string, std::string> keywords;
