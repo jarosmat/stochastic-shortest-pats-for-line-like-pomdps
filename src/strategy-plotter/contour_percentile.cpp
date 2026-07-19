@@ -87,6 +87,10 @@ bool too_high_exp(const double exp_to_comp, const double exp, const prob at_end_
     return exp_to_comp <= min_exp(exp, at_end_p, threshold, n_steps) / threshold;
 }
 
+bool valid_bel(const belief& bel) {
+    return std::to_string(static_cast<double>(bel[0])) != std::to_string(0.5)  || std::to_string(static_cast<double>(bel[2])) != std::to_string(0.5);
+}
+
 std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold,
                                          std::size_t time_cutoff = 10) {
     auto start = std::chrono::steady_clock::now();
@@ -131,7 +135,7 @@ std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const pro
 
             queue.emplace(std::move(pol_a), std::move(n_bel_a), new_exp_a, new_steps);
             queue.emplace(std::move(pol_b), std::move(n_bel_b), new_exp_b, new_steps);
-        } else if (res.empty() || res.back().expectation > exp / threshold) {
+        } else if ((res.empty() || res.back().expectation > exp / threshold) && valid_bel(bel)) {
             res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
         }
     }
