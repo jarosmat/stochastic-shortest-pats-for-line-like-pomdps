@@ -349,14 +349,75 @@ std::vector<std::string> get_labels(const float start_prob, const uint count) {
     return res;
 }
 
-int main() {
-    constexpr uint prob1_count = 1;
-    constexpr uint prob2_count = 9;
-    constexpr float grain = 0.1;
-    constexpr float start_prob1 = 0.1;
-    constexpr float start_prob2 = 0.1;
-    constexpr int colors = 1;
-    constexpr double threshold_val{0.5};
+
+struct program_params {
+    uint prob1_count = 9;
+    uint prob2_count = 9;
+    float grain = 0.1f;
+    float start_prob1 = 0.1f;
+    float start_prob2 = 0.1f;
+    uint colors = 1;
+    double threshold_val = 0.5;
+};
+
+enum struct parse_errors {
+    invalid_option,
+    missing_option_value
+};
+
+
+std::variant<program_params, parse_errors> parse_arguments(const std::vector<std::string> &args) {
+    program_params params;
+
+
+    const std::string prob1_count_str = "--prob1-count";
+    const std::string prob2_count_str = "--prob2-count";
+    const std::string grain_str = "--grain";
+    const std::string start_prob1_str = "--start-prob1";
+    const std::string start_prob2_str = "--start-prob2";
+    const std::string colors_str = "--colors";
+    const std::string threshold_val_str = "--threshold-val";
+
+    for (auto i{0uz}; i < args.size(); ++i) {
+        if (const std::string &arg{args[i]}; arg == prob1_count_str && i + 1 < args.size()) {
+            params.prob1_count = std::stoul(args[++i]);
+        } else if (arg == prob2_count_str && i + 1 < args.size()) {
+            params.prob2_count = std::stoul(args[++i]);
+        } else if (arg == grain_str && i + 1 < args.size()) {
+            params.grain = std::stof(args[++i]);
+        } else if (arg == start_prob1_str && i + 1 < args.size()) {
+            params.start_prob1 = std::stof(args[++i]);
+        } else if (arg == start_prob2_str && i + 1 < args.size()) {
+            params.start_prob2 = std::stof(args[++i]);
+        } else if (arg == colors_str && i + 1 < args.size()) {
+            params.colors = std::stoul(args[++i]);
+        } else if (arg == threshold_val_str && i + 1 < args.size()) {
+            params.threshold_val = std::stod(args[++i]);
+        } else {
+            return parse_errors::invalid_option;
+        }
+    }
+
+    return params;
+}
+
+int main(int argc, char *argv[]) {
+    std::vector<std::string> args(argv + 1, argv + argc);
+    auto parse_res = parse_arguments(args);
+
+    if (parse_res.index() == 1) {
+        std::cerr << "Invalid options" << std::endl;
+        return -1;
+    }
+    auto [
+        prob1_count,
+        prob2_count,
+        grain,
+        start_prob1,
+        start_prob2,
+        colors,
+        threshold_val
+    ]{std::get<0>(parse_res)};
     const prob threshold{threshold_val};
 
 
@@ -377,7 +438,8 @@ int main() {
     keywords["vmax"] = std::to_string(curr_strategy_index - 1);
 
     PyObject *plot_output = nullptr;
-    plt::imshow(buffer.data(), prob1_count, prob2_count, colors, keywords, &plot_output);
+    plt::imshow(buffer.data(), static_cast<int>(prob1_count), static_cast<int>(prob2_count), static_cast<int>(colors),
+                keywords, &plot_output);
     plt::colorbar(plot_output);
 
     if (PyObject *pyplot_module = PyImport_ImportModule("matplotlib.pyplot")) {
