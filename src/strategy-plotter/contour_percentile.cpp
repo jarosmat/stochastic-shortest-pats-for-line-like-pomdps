@@ -320,6 +320,35 @@ std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::si
     return buffer;
 }
 
+std::vector<double> get_ticks(const float grain, const float start_prob, const uint count) {
+    std::vector<double> res;
+    res.reserve(9);
+    const double len{1 / (grain * 10)};
+    for (auto i{1}, j{1}; i <= 9 && res.size() < count; ++i) {
+        if (static_cast<float>(0.1 * i) >= start_prob) {
+            res.push_back(static_cast<double>(j) * len - 1);
+            ++j;
+        }
+    }
+
+    return res;
+}
+
+std::vector<std::string> get_labels(const float start_prob, const uint count) {
+    const std::vector<std::string> labels_strings = {"0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"};
+    std::vector<std::string> res;
+    res.reserve(9);
+
+    for (auto i{1u}; i <= 9 && res.size() < count; ++i) {
+        if (static_cast<float>(0.1 * i) >= start_prob) {
+            res.push_back(labels_strings[i - 1]);
+        }
+    }
+
+
+    return res;
+}
+
 int main() {
     constexpr int rows = 9;
     constexpr int cols = 9;
@@ -381,27 +410,14 @@ int main() {
         Py_DECREF(pyplot_module);
     }
 
-    std::vector<double> ticks;
-    ticks.reserve(9);
-    constexpr double len{1 / (grain * 10)};
-    for (auto i{1}, j{1}; i <= 9; ++i) {
-        if (static_cast<float>(0.1 * i) >= start_prob) {
-            ticks.push_back(static_cast<double>(j) * len - 1);
-            ++j;
-        }
-    }
-
-    const std::vector<std::string> labels_strings = {"0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"};
-    std::vector<std::string> labels;
-    labels.reserve(9);
-
-    for (auto i{9 - ticks.size() + 1}; i <= 9; ++i) {
-        labels.push_back(labels_strings[i - 1]);
-    }
+    const std::vector ticks_prob_1{get_ticks(grain, start_prob1, prob1_count)};
+    const std::vector ticks_prob_2{get_ticks(grain, start_prob2, prob2_count)};
+    const std::vector labels_prob_1{get_labels(start_prob1, prob1_count)};
+    const std::vector labels_prob_2{get_labels(start_prob2, prob2_count)};
 
 
-    plt::xticks(ticks, labels);
-    plt::yticks(ticks, labels);
+    plt::xticks(ticks_prob_2, labels_prob_2);
+    plt::yticks(ticks_prob_1, labels_prob_1);
     plt::xlabel("Second prob");
     plt::ylabel("First prob");
     plt::title(
