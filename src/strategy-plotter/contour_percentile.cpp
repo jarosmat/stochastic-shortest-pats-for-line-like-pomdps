@@ -302,13 +302,13 @@ private:
 template<typename T>
     requires (!std::is_reference_v<T>)
 std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::size_t cols, const float grain,
-                               const float start_prob, const prob threshold, auto plotter_func) {
+                               const float start_prob1, const float start_prob2, const prob threshold, auto plotter_func) {
     std::vector<float> buffer(rows * cols);
     for (int j{0}; j < rows; ++j) {
         for (int i{0}; i < cols; ++i) {
             const std::size_t index{j * cols + i};
             std::vector probs_to_plot{
-                prob{static_cast<float>(j) * grain + start_prob}, prob{static_cast<float>(i) * grain + start_prob}
+                prob{static_cast<float>(j) * grain + start_prob1}, prob{static_cast<float>(i) * grain + start_prob2}
             };
             auto vals{plotter_func(probs_to_plot[0], probs_to_plot[1], threshold)};
             auto strategy{vals.back().policy};
@@ -324,7 +324,8 @@ int main() {
     constexpr int rows = 9;
     constexpr int cols = 9;
     constexpr float grain = 0.1;
-    constexpr float start_prob = 0.1;
+    constexpr float start_prob1 = 0.1;
+    constexpr float start_prob2 = 0.1;
     constexpr int colors = 1;
     constexpr double threshold_val{0.5};
     const prob threshold{threshold_val};
@@ -332,7 +333,7 @@ int main() {
 
     plain_filler filler;
     const std::vector buffer{
-        fill_buffer(filler, rows, cols, grain, start_prob, threshold,
+        fill_buffer(filler, rows, cols, grain, start_prob1, start_prob2, threshold,
                     [](const prob p1, const prob p2, const prob thr) {
                         return plot_percentile_max(p1, p2, thr);
                     })
