@@ -301,8 +301,10 @@ private:
 
 template<typename T>
     requires (!std::is_reference_v<T>)
-std::vector<float> fill_buffer(T &indexer, const std::size_t prob1_count, const std::size_t prob2_count, const float grain,
-                               const float start_prob1, const float start_prob2, const prob threshold, auto plotter_func) {
+std::vector<float> fill_buffer(T &indexer, const std::size_t prob1_count, const std::size_t prob2_count,
+                               const float grain,
+                               const float start_prob1, const float start_prob2, const prob threshold,
+                               auto plotter_func) {
     std::vector<float> buffer(prob1_count * prob2_count);
     for (int j{0}; j < prob1_count; ++j) {
         for (int i{0}; i < prob2_count; ++i) {
