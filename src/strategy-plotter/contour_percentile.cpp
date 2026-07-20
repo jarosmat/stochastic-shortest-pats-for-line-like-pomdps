@@ -250,6 +250,55 @@ private:
     }
 };
 
+struct string_len_filler_trail_b_less {
+    static constexpr std::size_t init_size{4};
+    std::unordered_map<std::string, std::size_t> strategy_map;
+    std::size_t curr_strategy_index{init_size};
+    std::vector<std::string> unique_labels;
+
+
+    string_len_filler_trail_b_less() : strategy_map(std::move(create_init_map(std::make_index_sequence<init_size>()))),
+                                       unique_labels(
+                                           std::move(create_init_vec(std::make_index_sequence<init_size>()))) {
+    }
+
+    float get_index(std::string &&strat) {
+        rem_suffix<s_instr>(strat);
+        const auto size{strat.size()};
+        update_labels(size);
+        return static_cast<float>(size);
+    }
+
+private:
+    void update_labels(const std::size_t n) {
+        unique_labels.reserve(n + 1);
+        for (auto i{unique_labels.size()}; i <= n; ++i) {
+            unique_labels.emplace_back(std::move(std::to_string(i)));
+            strategy_map.emplace(std::move(std::to_string(i)), i);
+        }
+        curr_strategy_index = unique_labels.size();
+    }
+
+
+    template<std::size_t ... InitVals>
+    static std::vector<std::string> create_init_vec(std::index_sequence<InitVals...>) {
+        std::vector<std::string> res;
+        res.reserve(sizeof...(InitVals));
+        (res.push_back(std::move(std::to_string(InitVals))), ...);
+
+        return res;
+    }
+
+    template<std::size_t ... InitVals>
+    static std::unordered_map<std::string, std::size_t> create_init_map(std::index_sequence<InitVals...>) {
+        std::unordered_map<std::string, std::size_t> res;
+        res.reserve(sizeof...(InitVals));
+        (res.insert({std::to_string(InitVals), InitVals}), ...);
+
+        return res;
+    }
+};
+
 template<typename T>
     requires (!std::is_reference_v<T>)
 std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::size_t cols, const float grain,
