@@ -301,12 +301,12 @@ private:
 
 template<typename T>
     requires (!std::is_reference_v<T>)
-std::vector<float> fill_buffer(T &indexer, const std::size_t rows, const std::size_t cols, const float grain,
+std::vector<float> fill_buffer(T &indexer, const std::size_t prob1_count, const std::size_t prob2_count, const float grain,
                                const float start_prob1, const float start_prob2, const prob threshold, auto plotter_func) {
-    std::vector<float> buffer(rows * cols);
-    for (int j{0}; j < rows; ++j) {
-        for (int i{0}; i < cols; ++i) {
-            const std::size_t index{j * cols + i};
+    std::vector<float> buffer(prob1_count * prob2_count);
+    for (int j{0}; j < prob1_count; ++j) {
+        for (int i{0}; i < prob2_count; ++i) {
+            const std::size_t index{j * prob2_count + i};
             std::vector probs_to_plot{
                 prob{static_cast<float>(j) * grain + start_prob1}, prob{static_cast<float>(i) * grain + start_prob2}
             };
@@ -350,8 +350,8 @@ std::vector<std::string> get_labels(const float start_prob, const uint count) {
 }
 
 int main() {
-    constexpr int rows = 9;
-    constexpr int cols = 9;
+    constexpr uint prob1_count = 1;
+    constexpr uint prob2_count = 9;
     constexpr float grain = 0.1;
     constexpr float start_prob1 = 0.1;
     constexpr float start_prob2 = 0.1;
@@ -362,7 +362,7 @@ int main() {
 
     plain_filler filler;
     const std::vector buffer{
-        fill_buffer(filler, rows, cols, grain, start_prob1, start_prob2, threshold,
+        fill_buffer(filler, prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold,
                     [](const prob p1, const prob p2, const prob thr) {
                         return plot_percentile_max(p1, p2, thr);
                     })
@@ -377,7 +377,7 @@ int main() {
     keywords["vmax"] = std::to_string(curr_strategy_index - 1);
 
     PyObject *plot_output = nullptr;
-    plt::imshow(buffer.data(), rows, cols, colors, keywords, &plot_output);
+    plt::imshow(buffer.data(), prob1_count, prob2_count, colors, keywords, &plot_output);
     plt::colorbar(plot_output);
 
     if (PyObject *pyplot_module = PyImport_ImportModule("matplotlib.pyplot")) {
