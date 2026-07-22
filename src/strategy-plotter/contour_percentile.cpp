@@ -417,14 +417,14 @@ using filler_variant = std::variant<plain_filler, trail_b_less_filler, string_le
 filler_variant get_b_less_filler(const display_vals to_display) {
     filler_variant res;
     switch (to_display) {
-        case display_vals::string_len:
-            res = string_len_filler_trail_b_less();
-            break;
         case display_vals::string_val:
             res = trail_b_less_filler();
             break;
+        case display_vals::string_len:
+            res = string_len_filler_trail_b_less();
+            break;
         case display_vals::invalid:
-            res = plain_filler();
+            res = trail_b_less_filler();
             break;
     }
 
@@ -434,11 +434,11 @@ filler_variant get_b_less_filler(const display_vals to_display) {
 filler_variant get_filler_with_b(const display_vals to_display) {
     filler_variant res;
     switch (to_display) {
-        case display_vals::string_len:
-            res = string_len_filler();
-            break;
         case display_vals::string_val:
             res = plain_filler();
+            break;
+        case display_vals::string_len:
+            res = string_len_filler();
             break;
         case display_vals::invalid:
             res = plain_filler();
