@@ -378,6 +378,7 @@ struct program_params {
 
 enum struct parse_errors {
     invalid_option,
+    invalid_option_value,
     missing_option_value
 };
 
@@ -464,7 +465,17 @@ int main(int argc, char *argv[]) {
     auto parse_res = parse_arguments(args);
 
     if (parse_res.index() == 1) {
-        std::cerr << "Invalid options" << std::endl;
+        switch (std::get<parse_errors>(parse_res)) {
+            case parse_errors::invalid_option:
+                std::cerr << "Invalid option" << std::endl;
+                break;
+            case parse_errors::invalid_option_value:
+                std::cerr << "Invalid option value" << std::endl;
+                break;
+            case parse_errors::missing_option_value:
+                std::cerr << "Option value not specified" << std::endl;
+                break;
+        }
         return -1;
     }
     auto [
