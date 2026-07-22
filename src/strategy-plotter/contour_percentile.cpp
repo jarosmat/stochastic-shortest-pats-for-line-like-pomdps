@@ -543,16 +543,50 @@ int main(const int argc, char *argv[]) {
         std::get<0>(parse_res)
     };
     const prob threshold{threshold_val};
+    auto filler{get_filler(to_show, trim_b)};
+
+    std::vector<float> buffer;
 
 
-    plain_filler filler;
-    const std::vector buffer{
-        fill_buffer(filler, prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold,
-                    [](const prob p1, const prob p2, const prob thr) {
-                        return plot_percentile_max(p1, p2, thr);
-                    })
+    auto min_exp_plotter_func = [](const prob p1, const prob p2, const prob thr) {
+        return plot_percentile_max(p1, p2, thr);
     };
-    auto &[strategy_map, curr_strategy_index, unique_labels]{filler};
+    auto exp_visitor = [prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold, min_exp_plotter_func
+            ](auto &&filler_val) {
+        return fill_buffer(filler_val, prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold,
+                           min_exp_plotter_func);
+    };
+
+    auto str_len_plotter_func = [](const prob p1, const prob p2, const prob thr) {
+        return plot_percentile(p1, p2, thr);
+    };
+    auto str_len_visitor = [prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold, str_len_plotter_func
+            ](auto &&filler_val) {
+        return fill_buffer(filler_val, prob1_count, prob2_count, grain, start_prob1, start_prob2, threshold,
+                           str_len_plotter_func);
+    };
+
+    switch (to_optimize) {
+        case quantities::min_expectation:
+            buffer = std::visit<std::vector<float> >(exp_visitor, filler);
+            break;
+        case quantities::min_str_len:
+            buffer = std::visit<std::vector<float> >(str_len_visitor, filler);
+            break;
+        default:
+            buffer = std::visit<std::vector<float> >(exp_visitor, filler);
+            break;
+    }
+
+    auto get_data_from_filler_visitor = [](auto &&filler_val) {
+        std::tuple<std::unordered_map<std::string, std::size_t>&,
+            std::size_t,
+            std::vector<std::string>& > res{filler_val.strategy_map, filler_val.curr_strategy_index, filler_val.unique_labels};
+        return res;
+    };
+    auto [strategy_map, curr_strategy_index, unique_labels]{std::visit<std::tuple<std::unordered_map<std::string, std::size_t>&,
+            std::size_t,
+            std::vector<std::string>& >>(get_data_from_filler_visitor, filler)};
 
 
     std::map<std::string, std::string> keywords;
