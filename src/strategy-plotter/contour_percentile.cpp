@@ -374,6 +374,7 @@ struct program_params {
     double threshold_val = 0.5;
     display_vals to_show = display_vals::string_val;
     quantities to_optimize = quantities::min_expectation;
+    bool trim_b = false;
 };
 
 enum struct parse_errors {
@@ -424,6 +425,7 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     const std::string threshold_val_str = "--threshold-val";
     const std::string to_display_str = "--display_val";
     const std::string quantity_str = "--quantity";
+    const std::string trim_b_str = "--trim-b";
 
     for (auto i{0uz}; i < args.size(); ++i) {
         if (const std::string &arg{args[i]}; arg == prob1_count_str && i + 1 < args.size()) {
@@ -452,6 +454,8 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
                 return parse_errors::invalid_option_value;
             }
             params.to_optimize = parse_res;
+        } else if (arg == trim_b_str) {
+            params.trim_b = true;
         } else {
             return parse_errors::invalid_option;
         }
@@ -487,7 +491,8 @@ int main(const int argc, char *argv[]) {
         colors,
         threshold_val,
         to_show,
-        to_optimize
+        to_optimize,
+        trim_b
     ]
     {
         std::get<0>(parse_res)
