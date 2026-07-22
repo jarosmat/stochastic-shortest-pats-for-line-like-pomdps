@@ -460,9 +460,9 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     return params;
 }
 
-int main(int argc, char *argv[]) {
-    std::vector<std::string> args(argv + 1, argv + argc);
-    auto parse_res = parse_arguments(args);
+int main(const int argc, char *argv[]) {
+    const std::vector<std::string> args(argv + 1, argv + argc);
+    const auto parse_res = parse_arguments(args);
 
     if (parse_res.index() == 1) {
         switch (std::get<parse_errors>(parse_res)) {
