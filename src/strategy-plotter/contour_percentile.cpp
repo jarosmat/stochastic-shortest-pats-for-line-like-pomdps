@@ -351,6 +351,18 @@ std::vector<std::string> get_labels(const float start_prob, const uint count) {
     return res;
 }
 
+enum struct display_vals {
+    string_val,
+    string_len,
+    invalid,
+};
+
+enum struct quantities {
+    min_expectation,
+    min_str_len,
+    invalid
+};
+
 
 struct program_params {
     uint prob1_count = 9;
@@ -360,12 +372,42 @@ struct program_params {
     float start_prob2 = 0.1f;
     uint colors = 1;
     double threshold_val = 0.5;
+    display_vals to_show = display_vals::string_val;
+    quantities to_optimize = quantities::min_expectation;
 };
 
 enum struct parse_errors {
     invalid_option,
     missing_option_value
 };
+
+quantities parse_quantity(const std::string &val) {
+    const std::string min_exp{"min_exp"};
+    const std::string min_str_len{"min_str_len"};
+
+    if (val == min_exp) {
+        return quantities::min_expectation;
+    }
+    if (val == min_str_len) {
+        return quantities::min_str_len;
+    }
+
+    return quantities::invalid;
+}
+
+display_vals parse_display_vals(const std::string &val) {
+    const std::string string_val{"string_val"};
+    const std::string string_len{"string_len"};
+
+    if (val == string_val) {
+        return display_vals::string_val;
+    }
+    if (val == string_len) {
+        return display_vals::string_len;
+    }
+
+    return display_vals::invalid;
+}
 
 
 std::variant<program_params, parse_errors> parse_arguments(const std::vector<std::string> &args) {
@@ -379,6 +421,8 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     const std::string start_prob2_str = "--start-prob2";
     const std::string colors_str = "--colors";
     const std::string threshold_val_str = "--threshold-val";
+    const std::string to_display_str = "--display_val";
+    const std::string quantity_str = "--quantity";
 
     for (auto i{0uz}; i < args.size(); ++i) {
         if (const std::string &arg{args[i]}; arg == prob1_count_str && i + 1 < args.size()) {
@@ -395,6 +439,18 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
             params.colors = std::stoul(args[++i]);
         } else if (arg == threshold_val_str && i + 1 < args.size()) {
             params.threshold_val = std::stod(args[++i]);
+        } else if (arg == to_display_str && i + 1 < args.size()) {
+            const auto parse_res{parse_display_vals(args[++i])};
+            if (parse_res == display_vals::invalid) {
+                return parse_errors::invalid_option_value;
+            }
+            params.to_show = parse_res;
+        } else if (arg == quantity_str && i + 1 < args.size()) {
+            const auto parse_res{parse_quantity(args[++i])};
+            if (parse_res == quantities::invalid) {
+                return parse_errors::invalid_option_value;
+            }
+            params.to_optimize = parse_res;
         } else {
             return parse_errors::invalid_option;
         }
@@ -418,8 +474,13 @@ int main(int argc, char *argv[]) {
         start_prob1,
         start_prob2,
         colors,
-        threshold_val
-    ]{std::get<0>(parse_res)};
+        threshold_val,
+        to_show,
+        to_optimize
+    ]
+    {
+        std::get<0>(parse_res)
+    };
     const prob threshold{threshold_val};
 
 
