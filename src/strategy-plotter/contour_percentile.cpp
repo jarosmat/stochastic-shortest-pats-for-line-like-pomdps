@@ -411,6 +411,51 @@ display_vals parse_display_vals(const std::string &val) {
     return display_vals::invalid;
 }
 
+using filler_variant = std::variant<plain_filler, trail_b_less_filler, string_len_filler,
+    string_len_filler_trail_b_less>;
+
+filler_variant get_b_less_filler(const display_vals to_display) {
+    filler_variant res;
+    switch (to_display) {
+        case display_vals::string_len:
+            res = string_len_filler_trail_b_less();
+            break;
+        case display_vals::string_val:
+            res = trail_b_less_filler();
+            break;
+        case display_vals::invalid:
+            res = plain_filler();
+            break;
+    }
+
+    return res;
+}
+
+filler_variant get_filler_with_b(const display_vals to_display) {
+    filler_variant res;
+    switch (to_display) {
+        case display_vals::string_len:
+            res = string_len_filler();
+            break;
+        case display_vals::string_val:
+            res = plain_filler();
+            break;
+        case display_vals::invalid:
+            res = plain_filler();
+            break;
+    }
+
+    return res;
+}
+
+filler_variant get_filler(const display_vals to_display, const bool trim_b) {
+    if (trim_b) {
+        return get_b_less_filler(to_display);
+    }
+
+    return get_filler_with_b(to_display);
+}
+
 
 std::variant<program_params, parse_errors> parse_arguments(const std::vector<std::string> &args) {
     program_params params;
