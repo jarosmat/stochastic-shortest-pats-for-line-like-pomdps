@@ -384,8 +384,8 @@ enum struct parse_errors {
 };
 
 quantities parse_quantity(const std::string &val) {
-    const std::string min_exp{"min_exp"};
-    const std::string min_str_len{"min_str_len"};
+    const std::string min_exp{"min-exp"};
+    const std::string min_str_len{"min-str-len"};
 
     if (val == min_exp) {
         return quantities::min_expectation;
@@ -398,8 +398,8 @@ quantities parse_quantity(const std::string &val) {
 }
 
 display_vals parse_display_vals(const std::string &val) {
-    const std::string string_val{"string_val"};
-    const std::string string_len{"string_len"};
+    const std::string string_val{"string-val"};
+    const std::string string_len{"string-len"};
 
     if (val == string_val) {
         return display_vals::string_val;
@@ -468,7 +468,7 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     const std::string start_prob2_str = "--start-prob2";
     const std::string colors_str = "--colors";
     const std::string threshold_val_str = "--threshold-val";
-    const std::string to_display_str = "--display_val";
+    const std::string to_display_str = "--display-val";
     const std::string quantity_str = "--quantity";
     const std::string trim_b_str = "--trim-b";
 
@@ -515,7 +515,7 @@ std::string build_title(const prob percentile, const bool trim_b, const quantiti
     res += std::to_string(static_cast<double>(percentile) * 100) + "%";
 
     if (trim_b) {
-        res += "final B symbols trimmed";
+        res += ", final B symbols trimmed";
     }
 
     switch (optimize) {
