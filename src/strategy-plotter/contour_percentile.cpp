@@ -509,7 +509,8 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     return params;
 }
 
-std::string build_title(const prob percentile, const bool trim_b, const quantities optimize, const display_vals to_display) {
+std::string build_title(const prob percentile, const bool trim_b, const quantities optimize,
+                        const display_vals to_display) {
     std::string res{"Percentile: "};
 
     res += std::to_string(static_cast<double>(percentile) * 100) + "%";
@@ -615,14 +616,18 @@ int main(const int argc, char *argv[]) {
     }
 
     auto get_data_from_filler_visitor = [](auto &&filler_val) {
-        std::tuple<std::unordered_map<std::string, std::size_t>&,
+        std::tuple<std::unordered_map<std::string, std::size_t> &,
             std::size_t,
-            std::vector<std::string>& > res{filler_val.strategy_map, filler_val.curr_strategy_index, filler_val.unique_labels};
+            std::vector<std::string> &> res{
+            filler_val.strategy_map, filler_val.curr_strategy_index, filler_val.unique_labels
+        };
         return res;
     };
-    auto [strategy_map, curr_strategy_index, unique_labels]{std::visit<std::tuple<std::unordered_map<std::string, std::size_t>&,
+    auto [strategy_map, curr_strategy_index, unique_labels]{
+        std::visit<std::tuple<std::unordered_map<std::string, std::size_t> &,
             std::size_t,
-            std::vector<std::string>& >>(get_data_from_filler_visitor, filler)};
+            std::vector<std::string> &> >(get_data_from_filler_visitor, filler)
+    };
 
 
     std::map<std::string, std::string> keywords;
