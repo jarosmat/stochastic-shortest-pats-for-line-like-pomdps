@@ -509,6 +509,42 @@ std::variant<program_params, parse_errors> parse_arguments(const std::vector<std
     return params;
 }
 
+std::string build_title(const prob percentile, const bool trim_b, const quantities optimize, const display_vals to_display) {
+    std::string res{"Percentile: "};
+
+    res += std::to_string(static_cast<double>(percentile) * 100) + "%";
+
+    if (trim_b) {
+        res += "final B symbols trimmed";
+    }
+
+    switch (optimize) {
+        case quantities::min_expectation:
+            res += ", minimizing expectation";
+            break;
+        case quantities::min_str_len:
+            res += ", minimizing string length";
+            break;
+        case quantities::invalid:
+            res += ", minimizing expectation";
+            break;
+    }
+
+    switch (to_display) {
+        case display_vals::string_val:
+            res += ", displaying value of the string";
+            break;
+        case display_vals::string_len:
+            res += ", displaying length of the string";
+            break;
+        case display_vals::invalid:
+            res += ", displaying value of the string";
+            break;
+    }
+
+    return res;
+}
+
 int main(const int argc, char *argv[]) {
     const std::vector<std::string> args(argv + 1, argv + argc);
     const auto parse_res = parse_arguments(args);
@@ -640,8 +676,7 @@ int main(const int argc, char *argv[]) {
     plt::yticks(ticks_prob_1, labels_prob_1);
     plt::xlabel("Second prob");
     plt::ylabel("First prob");
-    plt::title(
-        "Percentile: " + std::to_string(threshold_val) + ", podle delek strategii, prioritizujeme delku strategie");
+    plt::title(build_title(threshold, trim_b, to_optimize, to_show));
     plt::show();
     return 0;
 }
