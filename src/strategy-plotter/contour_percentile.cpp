@@ -16,6 +16,19 @@ struct queue_e {
     std::size_t steps;
 };
 
+std::ostream &operator<<(std::ostream &os, const queue_e &obj) {
+    os << "pol: " << obj.policy << '\n';
+    os << "bel: ";
+    for (auto &&a: obj.bel.bel) {
+        os << a << ", ";
+    }
+    os << '\n';
+    os << "exp: " << obj.expectation << '\n';
+    os << "steps: " << obj.steps << std::endl;
+
+    return os;
+}
+
 
 std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshold) {
     const lineLikePomdp pomdp({p1, p2});
@@ -313,6 +326,10 @@ std::vector<float> fill_buffer(T &indexer, const std::size_t prob1_count, const 
                 prob{static_cast<float>(j) * grain + start_prob1}, prob{static_cast<float>(i) * grain + start_prob2}
             };
             auto vals{plotter_func(probs_to_plot[0], probs_to_plot[1], threshold)};
+            std::cout << "first prob: " << probs_to_plot[0] << " sec prob: " << probs_to_plot[1] << std::endl;
+            for (auto &&v: vals) {
+                std::cout << v << std::endl;
+            }
             auto strategy{vals.back().policy};
             const float value{indexer.get_index(std::move(strategy))};
             buffer[index] = value;
