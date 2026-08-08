@@ -1,12 +1,13 @@
 from blessed import Terminal
 from enum import Enum
 from .screen_draw_result import ScreenDrawResult
+from pypomdp import prob
 
 
 class MaxProbTTriesConfig:
-    def __init__(self, moves_count: int, move_probs: list[float]):
-        self.moves_count = moves_count
-        self.move_probs = move_probs
+    def __init__(self, moves_count: int, move_probs: list[prob]):
+        self.moves_count: int = moves_count
+        self.move_probs: list[prob] = move_probs
 
 
 class MaxProbTTriesNumberSelectionScreen:
@@ -226,4 +227,4 @@ class MaxProbTTriesNumberSelectionScreen:
             self.input_buffer = self._display_value(self.probabilities[p_idx])
 
     def _get_result(self):
-        return MaxProbTTriesConfig(self.move_count, self.probabilities)
+        return MaxProbTTriesConfig(self.move_count, [prob(p) for p in self.probabilities])
