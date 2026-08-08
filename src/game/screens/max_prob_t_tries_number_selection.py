@@ -1,6 +1,6 @@
 from blessed import Terminal
 from enum import Enum
-from .screen_draw_result import ScreenDrawResult
+from .screen_result import ScreenResult
 from pypomdp import prob
 
 
@@ -73,7 +73,7 @@ class MaxProbTTriesNumberSelectionScreen:
 
         print(self.term.center("Input number of moves, number of states and move probabilities"))
         print()
-        print(self.term.center("Type numbers, Tab: next field, Enter: confirm field/submit, Q: quit"))
+        print(self.term.center("Type numbers, Tab: next field, Enter: submit, Q: quit"))
         print()
 
     def _get_field_count(self):
@@ -93,14 +93,14 @@ class MaxProbTTriesNumberSelectionScreen:
 
     @staticmethod
     def _get_incomplete():
-        return ScreenDrawResult.INCOMPLETE, {}
+        return ScreenResult.INCOMPLETE, {}
 
     @staticmethod
     def _get_exit():
-        return ScreenDrawResult.EXIT, {}
+        return ScreenResult.EXIT, {}
 
-    def _get_move(self):
-        return ScreenDrawResult.MOVE_NEXT, self._get_result()
+    def _get_complete(self):
+        return ScreenResult.COMPLETE, self._get_result()
 
     def draw(self):
         self._draw_header()
@@ -118,7 +118,7 @@ class MaxProbTTriesNumberSelectionScreen:
 
         if key.name == "KEY_ENTER" or key.code == 10:
             self._handle_enter()
-            return self._get_move()
+            return self._get_complete()
 
         if key.name == "KEY_TAB":
             self._handle_tabs(1)

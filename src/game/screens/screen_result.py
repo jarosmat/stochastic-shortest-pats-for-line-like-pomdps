@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ScreenDrawResult(Enum):
+class ScreenResult(Enum):
     EXIT = 0
-    MOVE_NEXT = 1
+    COMPLETE = 1
     INCOMPLETE = 2
