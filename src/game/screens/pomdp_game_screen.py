@@ -2,6 +2,10 @@ from blessed import Terminal
 from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
 
+from .game_results import GameResult
+from .screen_result import ScreenResult
+from .game_type import GameType
+
 
 class POMDPGameState(Enum):
     RUNNING = 0
@@ -14,15 +18,16 @@ class POMDPGameScreen:
     EMPTY_CHAR = " "
     WIN_THRESHOLD = 0.95
 
-    def __init__(self, term: Terminal):
+    def __init__(self, term: Terminal, validator):
         self.max_moves = 0
-        self.move_count = 0
         self.pomdp: LineLikePomdp = LineLikePomdp([])
         self.states = 0
         self.term = term
         self.belief: belief = belief(0)
         self.input_buffer = ""
         self.game_state = POMDPGameState.RUNNING
+        self.validator = validator
+        self.actions = []
 
     def set_config(self, move_count: int, probs: list[prob]):
         self.max_moves = move_count
@@ -31,13 +36,13 @@ class POMDPGameScreen:
         self.reset_game()
 
     def reset_game(self):
-        self.move_count = 0
         self.belief = belief([prob(0.0) for _ in range(self.states)])
         self.belief[0] = prob(1.0)
         self.input_buffer = ""
 
     def _apply_action_by_index(self, action_idx: int):
         self.belief = self.pomdp.update_belief(self.belief, action_idx)
+        self.actions.append(action_idx)
 
     def _apply_action_from_input(self):
         if not self.input_buffer:
@@ -89,12 +94,11 @@ class POMDPGameScreen:
         self._draw_containers()
         self._draw_belief()
 
-
-
         if self.game_state == POMDPGameState.WON:
             print(self.term.center(self.term.green(self.term.bold("YOU WON!"))))
         else:
-            print(self.term.center(f"State: {0}, Actions: 0-{self.states - 1}"))
+            print(self.term.center(
+                f"Actions taken: {self.actions}, Actions available: [{self.max_moves - len(self.actions)}/{self.max_moves}] ,Possible actions: [0-{self.states - 2}]"))
 
         print()
 
@@ -102,7 +106,7 @@ class POMDPGameScreen:
         print(self.term.center(action))
 
         print()
-        print(self.term.center("I: Input action, R: Reset, B: Back, Q: Quit"))
+        print(self.term.center("I: Input action, R: Reset, Q: Quit"))
 
         key = self.term.inkey(timeout=0.1)
 
@@ -110,9 +114,33 @@ class POMDPGameScreen:
             self._apply_action_from_input()
         elif key.lower() == "r":
             self.reset_game()
+            return self._get_incomplete()
         elif key.lower() == "q":
-            return "quit"
+            return self._get_exit()
         elif key.isdigit():
             self.input_buffer += key
+            return self._get_incomplete()
 
         return None
+
+    @staticmethod
+    def _get_incomplete():
+        return ScreenResult.INCOMPLETE, {}
+
+    @staticmethod
+    def _get_exit():
+        return ScreenResult.EXIT, {}
+
+    def _get_complete(self):
+        return ScreenResult.COMPLETE, self._get_result()
+
+    def _handle_enter(self):
+        self._apply_action_from_input()
+
+        if self.validator(self):
+            return self._get_complete()
+
+        return self._get_incomplete()
+
+    def _get_result(self):
+        return GameResult(GameType.MAX_PROB_T_TRIES, self.pomdp, self.belief, self.actions)
