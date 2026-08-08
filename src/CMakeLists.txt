@@ -6,6 +6,9 @@ set(TEST_DIRECTORY "${PROJECT_SOURCE_DIR}/Tests")
 set(PARSER_DIRECTORY "${PROJECT_SOURCE_DIR}/pomdp-parser")
 set(QUANTIFIER_DIRECTORY "${PROJECT_SOURCE_DIR}/performace-quantifier")
 set(POLICIES_DIR "${PROJECT_SOURCE_DIR}/policies")
+set(PROB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/probability")
+set(BELIEF_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/belief")
+set(LINE_LIKE_POMDP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/pomdps")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -25,6 +28,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(matplotlib-cpp)
 
+FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.12.0
+)
+FetchContent_MakeAvailable(pybind11)
 
 execute_process(
         COMMAND ${Python3_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
@@ -35,6 +44,19 @@ if(NOT NUMPY_INCLUDE_DIR)
     message(FATAL_ERROR "NumPy headers not found. Install numpy: pip install numpy")
 endif()
 
+pybind11_add_module(pypomdp python_bindings.cpp
+    "${PROB_DIR}/prob.cpp"
+    "${BELIEF_DIR}/belief.cpp"
+    "${LINE_LIKE_POMDP_DIR}/lineLikePomdp.cpp"
+)
+target_link_libraries(pypomdp PRIVATE Python3::Python)
+target_include_directories(pypomdp PRIVATE 
+    ${NUMPY_INCLUDE_DIR} 
+    ${matplotlib-cpp_SOURCE_DIR}
+    ${PROB_DIR}
+    ${BELIEF_DIR}
+    ${LINE_LIKE_POMDP_DIR}
+)
 
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE Python3::Python)
