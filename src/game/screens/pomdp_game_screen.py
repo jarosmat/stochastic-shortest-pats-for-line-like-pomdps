@@ -172,7 +172,7 @@ class POMDPGameScreen(ScreenBase):
             self.input_buffer += key
             return self._get_incomplete()
 
-        return None
+        return self._get_incomplete()
 
     def _handle_enter(self):
         self._apply_action_from_input()
