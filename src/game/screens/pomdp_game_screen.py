@@ -9,7 +9,7 @@ from .game_type import GameType
 
 class POMDPGameState(Enum):
     RUNNING = 0
-    WON = 1
+    COMPLETE = 1
 
 
 class POMDPGameScreen:
@@ -17,17 +17,20 @@ class POMDPGameScreen:
     CONTAINER_CHAR = "█"
     EMPTY_CHAR = " "
     WIN_THRESHOLD = 0.95
+    DISPLAYED_PRECISION = 10
 
-    def __init__(self, term: Terminal, validator):
-        self.max_moves = 0
+    def __init__(self, term: Terminal, validator, more_info):
+        self.max_moves: int = 0
         self.pomdp: LineLikePomdp = LineLikePomdp([])
-        self.states = 0
+        self.states: int = 0
         self.term = term
         self.belief: belief = belief(0)
         self.input_buffer = ""
         self.game_state = POMDPGameState.RUNNING
         self.validator = validator
-        self.actions = []
+        self.actions: list[int] = []
+        self.more_info = more_info
+        self.err_msg = ""
 
     def set_config(self, move_count: int, probs: list[prob]):
         self.max_moves = move_count
@@ -38,6 +41,7 @@ class POMDPGameScreen:
     def reset_game(self):
         self.belief = belief([prob(0.0) for _ in range(self.states)])
         self.belief[0] = prob(1.0)
+        self.actions = []
         self.input_buffer = ""
 
     def _apply_action_by_index(self, action_idx: int):
@@ -51,11 +55,24 @@ class POMDPGameScreen:
             action_idx = int(self.input_buffer)
         except ValueError:
             return
-        self._apply_action_by_index(action_idx)
+        try:
+            self._apply_action_by_index(action_idx)
+        except RuntimeError:
+            self.err_msg = f"Invalid Action: {action_idx}"
+
         self.input_buffer = ""
 
-    def _draw_container(self, probability: prob):
+    def _get_fill_count(self, probability: prob):
         fill_count = int(float(probability) * self.CONTAINER_WIDTH)
+
+        if fill_count == 0 and probability > prob(0.0):
+            return 1
+
+        return fill_count
+
+
+    def _draw_container(self, probability: prob):
+        fill_count = self._get_fill_count(probability)
         fill_str = self.CONTAINER_CHAR * fill_count
         empty_str = self.EMPTY_CHAR * (self.CONTAINER_WIDTH - fill_count)
 
@@ -83,30 +100,44 @@ class POMDPGameScreen:
     def _draw_belief(self):
         print(self.term.center("Belief:"))
         belief_strs = []
-        for i, probability in enumerate(self.belief):
-            prob_percent = f"{float(probability) * 100:.1f}%"
+        for i in range(self.states):
+            prob_percent = f"{float(self.belief[i]) * 100:.{self.DISPLAYED_PRECISION}f}%"
             belief_strs.append(f"S{i}={prob_percent}")
         print(self.term.center("  ".join(belief_strs)))
         print()
+
+    def _draw_info(self):
+        print(self.term.center(
+            f"Actions taken: {self.actions}, Possible actions: [0-{self.states - 2}]"))
+        print()
+
+    def _draw_input_buffet(self):
+        action = f'[{self.input_buffer}]'
+        print(self.term.center(action))
+        print()
+
+    def _draw_controls(self):
+        print(self.term.center("I: Input action, R: Reset, Q: Quit"))
+        print()
+
+    def _draw_more_info(self):
+        self.more_info(self)
+        print()
+
+    def _draw_error(self):
+        if self.err_msg != "":
+            print(self.term.center(self.term.bold_red(self.err_msg)))
+            print()
 
     def draw(self):
         self._draw_header()
         self._draw_containers()
         self._draw_belief()
-
-        if self.game_state == POMDPGameState.WON:
-            print(self.term.center(self.term.green(self.term.bold("YOU WON!"))))
-        else:
-            print(self.term.center(
-                f"Actions taken: {self.actions}, Actions available: [{self.max_moves - len(self.actions)}/{self.max_moves}] ,Possible actions: [0-{self.states - 2}]"))
-
-        print()
-
-        action = f'[{self.input_buffer}]'
-        print(self.term.center(action))
-
-        print()
-        print(self.term.center("I: Input action, R: Reset, Q: Quit"))
+        self._draw_info()
+        self._draw_more_info()
+        self._draw_input_buffet()
+        self._draw_controls()
+        self._draw_error()
 
         key = self.term.inkey(timeout=0.1)
 
