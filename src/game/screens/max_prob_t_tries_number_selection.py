@@ -1,7 +1,7 @@
 from blessed import Terminal
 from enum import Enum
-from .screen_result import ScreenResult
 from pypomdp import prob
+from .base import ScreenBase
 
 
 class MaxProbTTriesConfig:
@@ -10,7 +10,7 @@ class MaxProbTTriesConfig:
         self.move_probs: list[prob] = move_probs
 
 
-class MaxProbTTriesNumberSelectionScreen:
+class MaxProbTTriesNumberSelectionScreen(ScreenBase):
     DEF_STATE_COUNT = 3
     MAX_STATE_COUNT = 5
     MIN_STATE_COUNT = 3
@@ -31,12 +31,11 @@ class MaxProbTTriesNumberSelectionScreen:
         PROBABILITY = 1
 
     def __init__(self, term: Terminal):
-        self.term = term
+        super().__init__(term)
         self.state_count = MaxProbTTriesNumberSelectionScreen.DEF_STATE_COUNT
         self.move_count = self.DEF_MOVE_COUNT
         self.probabilities = [MaxProbTTriesNumberSelectionScreen.DEF_PROB for _ in range(self.state_count - 1)]
         self.current_field = self.MOVE_COUNT_FIELD
-        self.input_buffer = ""
         self._load_field_input()
 
     def _get_field_value(self, idx: int):
@@ -83,24 +82,9 @@ class MaxProbTTriesNumberSelectionScreen:
         self.current_field = (self.current_field + move_count) % self._get_field_count()
         self._load_field_input()
 
-    def _delete_char(self):
-        if self.input_buffer != '':
-            self.input_buffer = self.input_buffer[:-1]
-
     def _handle_tabs(self, move: int):
         self._save_current_input()
         self._move_field(move)
-
-    @staticmethod
-    def _get_incomplete():
-        return ScreenResult.INCOMPLETE, {}
-
-    @staticmethod
-    def _get_exit():
-        return ScreenResult.EXIT, {}
-
-    def _get_complete(self):
-        return ScreenResult.COMPLETE, self._get_result()
 
     def draw(self):
         self._draw_header()
@@ -152,12 +136,6 @@ class MaxProbTTriesNumberSelectionScreen:
             return False
 
         return '.' not in self.input_buffer
-
-    @staticmethod
-    def _display_value(value):
-        if value is None:
-            return ""
-        return str(value)
 
     def _handle_enter(self):
         self._save_current_input()

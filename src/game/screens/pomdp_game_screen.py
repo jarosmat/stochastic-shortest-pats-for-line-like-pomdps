@@ -3,8 +3,8 @@ from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
 
 from .game_results import GameResult
-from .screen_result import ScreenResult
 from .game_type import GameType
+from .base import ScreenBase
 
 
 class POMDPGameState(Enum):
@@ -12,7 +12,7 @@ class POMDPGameState(Enum):
     COMPLETE = 1
 
 
-class POMDPGameScreen:
+class POMDPGameScreen(ScreenBase):
     CONTAINER_WIDTH = 35
     CONTAINER_CHAR = "█"
     EMPTY_CHAR = " "
@@ -20,17 +20,15 @@ class POMDPGameScreen:
     DISPLAYED_PRECISION = 10
 
     def __init__(self, term: Terminal, validator, more_info):
+        super().__init__(term)
         self.max_moves: int = 0
         self.pomdp: LineLikePomdp = LineLikePomdp([])
         self.states: int = 0
-        self.term = term
         self.belief: belief = belief(0)
-        self.input_buffer = ""
         self.game_state = POMDPGameState.RUNNING
         self.validator = validator
         self.actions: list[int] = []
         self.more_info = more_info
-        self.err_msg = ""
 
     def set_config(self, move_count: int, probs: list[prob]):
         self.max_moves = move_count
@@ -69,7 +67,6 @@ class POMDPGameScreen:
             return 1
 
         return fill_count
-
 
     def _draw_container(self, probability: prob):
         fill_count = self._get_fill_count(probability)
@@ -124,11 +121,6 @@ class POMDPGameScreen:
         self.more_info(self)
         print()
 
-    def _draw_error(self):
-        if self.err_msg != "":
-            print(self.term.center(self.term.bold_red(self.err_msg)))
-            print()
-
     def draw(self):
         self._draw_header()
         self._draw_containers()
@@ -153,17 +145,6 @@ class POMDPGameScreen:
             return self._get_incomplete()
 
         return None
-
-    @staticmethod
-    def _get_incomplete():
-        return ScreenResult.INCOMPLETE, {}
-
-    @staticmethod
-    def _get_exit():
-        return ScreenResult.EXIT, {}
-
-    def _get_complete(self):
-        return ScreenResult.COMPLETE, self._get_result()
 
     def _handle_enter(self):
         self._apply_action_from_input()
