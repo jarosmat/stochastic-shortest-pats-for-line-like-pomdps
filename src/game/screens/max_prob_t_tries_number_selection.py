@@ -69,7 +69,10 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
 
     def _draw_header(self):
         print(self.term.clear())
-
+        print(self.term.center(self.term.bold("Set the game options")))
+        print()
+        print(self.term.center("The goal is to move as much matter to the final container"))
+        print()
         print(self.term.center("Input number of moves, number of states and move probabilities"))
         print()
         print(self.term.center("Type numbers, Tab: next field, Enter: submit, Q: quit"))
