@@ -19,7 +19,7 @@ class POMDPGameScreen(ScreenBase):
     EMPTY_CHAR = " "
     WIN_THRESHOLD = 0.95
 
-    def __init__(self, term: Terminal, validator, more_info):
+    def __init__(self, term: Terminal, validator, more_info, complete_drawer):
         super().__init__(term)
         self.max_moves: int = 0
         self.pomdp: LineLikePomdp = LineLikePomdp([])
@@ -29,6 +29,7 @@ class POMDPGameScreen(ScreenBase):
         self.validator = validator
         self.actions: list[int] = []
         self.more_info = more_info
+        self.complete_drawer = complete_drawer
 
     def set_config(self, move_count: int, probs: list[prob]):
         self.max_moves = move_count
@@ -41,6 +42,7 @@ class POMDPGameScreen(ScreenBase):
         self.belief[0] = prob(1.0)
         self.actions = []
         self.input_buffer = ""
+        self.game_state = POMDPGameState.RUNNING
 
     def _apply_action_by_index(self, action_idx: int):
         self.belief = self.pomdp.update_belief(self.belief, action_idx)
@@ -57,6 +59,9 @@ class POMDPGameScreen(ScreenBase):
             self._apply_action_by_index(action_idx)
         except RuntimeError:
             self.err_msg = f"Invalid Action: {action_idx}"
+
+        if self.validator(self):
+            self.game_state = POMDPGameState.COMPLETE
 
         self.input_buffer = ""
 
@@ -81,10 +86,10 @@ class POMDPGameScreen(ScreenBase):
         print(self.term.clear())
         print(self.term.center(self.term.bold("POMDP LINE GAME")))
         print()
-        print(self.term.center("States (containers with belief mass):"))
-        print()
 
     def _draw_containers(self):
+        print(self.term.center("States (containers with belief mass):"))
+        print()
         containers = []
         labels = []
         for i in range(self.states):
@@ -121,20 +126,38 @@ class POMDPGameScreen(ScreenBase):
         self.more_info(self)
         print()
 
-    def draw(self):
+    def _draw_complete_msg(self):
+        self.complete_drawer(self)
+
+    def _draw_running(self):
         self._draw_header()
         self._draw_containers()
         self._draw_belief()
         self._draw_info()
         self._draw_more_info()
-        self._draw_input_buffet()
+        self._draw_input_buffer()
         self._draw_controls()
         self._draw_error()
+
+    def _draw_complete(self):
+        self._draw_header()
+        self._draw_complete_msg()
+        self._draw_containers()
+        self._draw_belief()
+        self._draw_info()
+        self._draw_controls()
+
+    def draw(self):
+        if self.game_state == POMDPGameState.RUNNING:
+            self._draw_running()
+        elif self.game_state == POMDPGameState.COMPLETE:
+            self._draw_complete()
 
         key = self.term.inkey(timeout=0.1)
 
         if key.name == "KEY_ENTER" or key.code == 10:
             self._apply_action_from_input()
+            return self._get_complete()
         elif key.lower() == "r":
             self.reset_game()
             return self._get_incomplete()
