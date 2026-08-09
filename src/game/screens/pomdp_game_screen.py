@@ -108,7 +108,7 @@ class POMDPGameScreen(ScreenBase):
             f"Actions taken: {self.actions}, Possible actions: [0-{self.states - 2}]"))
         print()
 
-    def _draw_input_buffet(self):
+    def _draw_input_buffer(self):
         action = f'[{self.input_buffer}]'
         print(self.term.center(action))
         print()
