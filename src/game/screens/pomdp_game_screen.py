@@ -114,7 +114,7 @@ class POMDPGameScreen(ScreenBase):
         print()
 
     def _draw_controls(self):
-        print(self.term.center("I: Input action, R: Reset, Q: Quit"))
+        print(self.term.center("R: Reset, Q: Quit"))
         print()
 
     def _draw_more_info(self):
