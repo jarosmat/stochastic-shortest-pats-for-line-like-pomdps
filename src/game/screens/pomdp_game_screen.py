@@ -5,6 +5,7 @@ from pypomdp import prob, belief, LineLikePomdp
 from .game_results import GameResult
 from .game_type import GameType
 from .base import ScreenBase
+from .utils import display_percentage
 
 
 class POMDPGameState(Enum):
@@ -17,7 +18,6 @@ class POMDPGameScreen(ScreenBase):
     CONTAINER_CHAR = "█"
     EMPTY_CHAR = " "
     WIN_THRESHOLD = 0.95
-    DISPLAYED_PRECISION = 10
 
     def __init__(self, term: Terminal, validator, more_info):
         super().__init__(term)
@@ -98,7 +98,7 @@ class POMDPGameScreen(ScreenBase):
         print(self.term.center("Belief:"))
         belief_strs = []
         for i in range(self.states):
-            prob_percent = f"{float(self.belief[i]) * 100:.{self.DISPLAYED_PRECISION}f}%"
+            prob_percent = display_percentage(self.belief[i])
             belief_strs.append(f"S{i}={prob_percent}")
         print(self.term.center("  ".join(belief_strs)))
         print()
