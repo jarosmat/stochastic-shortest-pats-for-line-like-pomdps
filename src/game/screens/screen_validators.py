@@ -1,2 +1,6 @@
 def validate_max_prob_t_tries_win(screen):
-    return len(screen.actions) == screen.max_moves
+    mvs = screen.extra_vals.get("max_moves")
+    if mvs is not None:
+        return len(screen.actions) == mvs
+
+    return False

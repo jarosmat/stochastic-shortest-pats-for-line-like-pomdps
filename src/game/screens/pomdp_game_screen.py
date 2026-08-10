@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import TypeVar
+
 from blessed import Terminal
 from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
@@ -6,6 +9,8 @@ from .game_results import GameResult
 from .game_type import GameType
 from .base import ScreenBase
 from .utils import display_percentage
+
+T = TypeVar('T')
 
 
 class POMDPGameState(Enum):
@@ -21,7 +26,6 @@ class POMDPGameScreen(ScreenBase):
 
     def __init__(self, term: Terminal):
         super().__init__(term)
-        self.max_moves: int = 0
         self.pomdp: LineLikePomdp = LineLikePomdp([])
         self.states: int = 0
         self.belief: belief = belief(0)
@@ -30,9 +34,11 @@ class POMDPGameScreen(ScreenBase):
         self.actions: list[int] = []
         self.more_info = None
         self.complete_drawer = None
+        self.extra_vals = dict()
 
-    def set_config(self, move_count: int, probs: list[prob], validator, more_info, complete_drawer):
-        self.max_moves = move_count
+    def set_config(self, extra_vals: dict[str, T], probs: list[prob], validator: Callable[[ScreenBase], None],
+                   more_info: Callable[[ScreenBase], None], complete_drawer: Callable[[ScreenBase], None]):
+        self.extra_vals = extra_vals
         self.states = len(probs) + 1
         self.pomdp = LineLikePomdp(probs)
         self.reset_game()
