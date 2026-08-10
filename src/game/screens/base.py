@@ -21,9 +21,21 @@ class ScreenBase(ABC):
         if self.input_buffer != '':
             self.input_buffer = self.input_buffer[:-1]
 
+    def _set_error_msg(self, value: str):
+        self.err_msg = value
+
+    def _clear_error_msg(self):
+        self.err_msg = ""
+
+    def _error_msg_empty(self):
+        return self.err_msg == ""
+
+    def _get_error_msg(self):
+        return self.err_msg
+
     def _draw_error(self):
-        if self.err_msg != "":
-            print(self.term.center(self.term.bold_red(self.err_msg)))
+        if not self._error_msg_empty():
+            print(self.term.center(self.term.bold_red(self._get_error_msg())))
             print()
 
     @staticmethod

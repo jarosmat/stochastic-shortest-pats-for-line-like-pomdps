@@ -61,7 +61,7 @@ class POMDPGameScreen(ScreenBase):
         try:
             self._apply_action_by_index(action_idx)
         except RuntimeError:
-            self.err_msg = f"Invalid Action: {action_idx}"
+            self._set_error_msg(f"Invalid Action: {action_idx}")
 
         if callable(self.validator) and self.validator(self):
             self.game_state = POMDPGameState.COMPLETE
