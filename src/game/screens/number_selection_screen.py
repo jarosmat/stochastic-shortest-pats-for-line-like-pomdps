@@ -1,16 +1,22 @@
+from collections.abc import Callable
+from typing import TypeVar
+
 from blessed import Terminal
 from enum import Enum
 from pypomdp import prob
 from .base import ScreenBase
 
 
-class MaxProbTTriesConfig:
-    def __init__(self, moves_count: int, move_probs: list[prob]):
-        self.moves_count: int = moves_count
+class GameConfig:
+    def __init__(self, move_probs: list[prob], additional_info):
         self.move_probs: list[prob] = move_probs
+        self.additional_info = additional_info
 
 
-class MaxProbTTriesNumberSelectionScreen(ScreenBase):
+T = TypeVar('T')
+
+
+class NumberSelectionScreen(ScreenBase):
     DEF_STATE_COUNT = 3
     MAX_STATE_COUNT = 5
     MIN_STATE_COUNT = 3
@@ -19,32 +25,31 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
     PROB_LOWER_BOUND = 0.1
     PROB_UPPER_BOUND = 1
 
-    DEF_MOVE_COUNT = 10
-    MAX_MOVE_COUNT = 100
-
-    MOVE_COUNT_FIELD = 0
-    STATE_COUNT_FIELD = 1
     PROB_FIELDS_OFFSET = 2
 
     class InputFieldTypes(Enum):
         INTEGER = 0
         PROBABILITY = 1
 
-    def __init__(self, term: Terminal):
+    def __init__(self, term: Terminal, additional_fields: list[tuple[str, T, Callable[[str], T]]], game_msg: list[str]):
         super().__init__(term)
-        self.state_count = MaxProbTTriesNumberSelectionScreen.DEF_STATE_COUNT
-        self.move_count = self.DEF_MOVE_COUNT
-        self.probabilities = [MaxProbTTriesNumberSelectionScreen.DEF_PROB for _ in range(self.state_count - 1)]
-        self.current_field = self.MOVE_COUNT_FIELD
+        self.state_count = NumberSelectionScreen.DEF_STATE_COUNT
+        self.probabilities = [NumberSelectionScreen.DEF_PROB for _ in range(self.state_count - 1)]
+        self.current_field = 0
+        self.additional_fields = additional_fields
+        self.STATE_COUNT_FIELD = len(additional_fields)
+        self.additional_fields_vals = [self.additional_fields[i][1] for i in range(self.STATE_COUNT_FIELD)]
+        self.PROB_FIELDS_OFFSET = self.STATE_COUNT_FIELD + 1
+        self.game_msg = game_msg
         self._load_field_input()
 
     def _get_field_value(self, idx: int):
-        if idx == self.MOVE_COUNT_FIELD:
-            return self._display_value(self.move_count)
+        if idx < self.STATE_COUNT_FIELD:
+            return self._display_value(self.additional_fields_vals[idx])
         if idx == self.STATE_COUNT_FIELD:
-            return self._display_value(self.state_count)
+            return self.state_count
         if idx < self._get_field_count():
-            return self._display_value(self.probabilities[idx - self.PROB_FIELDS_OFFSET])
+            return self.probabilities[idx - self.PROB_FIELDS_OFFSET]
 
         return None
 
@@ -57,29 +62,35 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
             print(f"  [{self._display_value(self._get_field_value(field_id))}]")
         print()
 
-    def _draw_move_selector(self):
-        self._draw_input_field('number of moves', self.MOVE_COUNT_FIELD)
-
-    def _draw_state_selector(self):
+    def _draw_state_selection(self):
         self._draw_input_field('Number of states', self.STATE_COUNT_FIELD)
 
     def _draw_prob_selection(self):
         for i in range(self.state_count - 1):
             self._draw_input_field(f"Move probability {i + 1}:", i + self.PROB_FIELDS_OFFSET)
 
+    def _draw_pomdp_selection(self):
+        self._draw_state_selection()
+        self._draw_prob_selection()
+
     def _draw_header(self):
         print(self.term.clear())
         print(self.term.center(self.term.bold("Set the game options")))
         print()
-        print(self.term.center("The goal is to move as much matter to the final container"))
-        print()
-        print(self.term.center("Input number of moves, number of states and move probabilities"))
-        print()
+
+        for msg in self.game_msg:
+            print(self.term.center(msg))
+            print()
+
         print(self.term.center("Type numbers, Tab: next field, Enter: submit, Q: quit"))
         print()
 
+    def _draw_additional_info_selection(self):
+        for i, val in enumerate(self.additional_fields):
+            self._draw_input_field(val[0], i)
+
     def _get_field_count(self):
-        return self.PROB_FIELDS_OFFSET + (self.state_count - 1)
+        return self.STATE_COUNT_FIELD + self.state_count
 
     def _move_field(self, move_count: int):
         self.current_field = (self.current_field + move_count) % self._get_field_count()
@@ -91,9 +102,9 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
 
     def draw(self):
         self._draw_header()
-        self._draw_move_selector()
-        self._draw_state_selector()
-        self._draw_prob_selection()
+        self._draw_additional_info_selection()
+        self._draw_pomdp_selection()
+        self._draw_error()
 
         key = self.term.inkey(timeout=0.1)
 
@@ -123,28 +134,19 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
             self._delete_char()
             return self._get_incomplete()
 
-        if key == ".":
-            if self._validate_dot():
-                self.input_buffer += key
-            return self._get_incomplete()
-
-        if key.isdigit():
+        if key.isascii():
             self.input_buffer += key
             return self._get_incomplete()
 
         return self._get_incomplete()
 
-    def _validate_dot(self) -> bool:
-        if self.current_field == self.STATE_COUNT_FIELD or self.current_field == self.MOVE_COUNT_FIELD:
-            return False
-
-        return '.' not in self.input_buffer
-
     def _handle_enter(self):
         self._save_current_input()
 
     def _get_converter(self):
-        if self.current_field == self.MOVE_COUNT_FIELD or self.current_field == self.STATE_COUNT_FIELD:
+        if self.current_field < self.STATE_COUNT_FIELD:
+            return self.additional_fields[self.current_field][2]
+        if self.current_field == self.STATE_COUNT_FIELD:
             return int
         return float
 
@@ -160,10 +162,6 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
             self.probabilities.append(self.DEF_PROB)
             pl += 1
 
-    def _set_move_count(self, value: int):
-        if value < self.MAX_MOVE_COUNT:
-            self.move_count = value
-
     def _set_state_count(self, value: int):
         if self.MIN_STATE_COUNT <= value <= self.MAX_STATE_COUNT:
             self.state_count = value
@@ -174,8 +172,8 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
             self.probabilities[p_idx] = value
 
     def _set_value(self, value):
-        if self.current_field == self.MOVE_COUNT_FIELD:
-            self._set_move_count(value)
+        if self.current_field < self.STATE_COUNT_FIELD:
+            self.additional_fields_vals[self.current_field] = value
         elif self.current_field == self.STATE_COUNT_FIELD:
             self._set_state_count(value)
         else:
@@ -190,8 +188,11 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
         try:
             value = converter(self.input_buffer)
         except ValueError:
+            self.input_buffer = ""
+            self._set_error_msg("Invalid value for this field")
             return
 
+        self._clear_error_msg()
         self._set_value(value)
 
         self.input_buffer = ""
@@ -199,13 +200,12 @@ class MaxProbTTriesNumberSelectionScreen(ScreenBase):
     def _load_field_input(self):
         if self.input_buffer != '':
             return
-        if self.current_field == self.MOVE_COUNT_FIELD:
-            self.input_buffer = self._display_value(self.move_count)
+        if self.current_field < self.STATE_COUNT_FIELD:
+            self.input_buffer = self._display_value(self.additional_fields_vals[self.current_field])
         elif self.current_field == self.STATE_COUNT_FIELD:
             self.input_buffer = self._display_value(self.state_count)
-        else:
-            p_idx = self.current_field - self.PROB_FIELDS_OFFSET
-            self.input_buffer = self._display_value(self.probabilities[p_idx])
+        elif self.current_field < self._get_field_count():
+            self.input_buffer = self._display_value(self.probabilities[self.current_field - self.PROB_FIELDS_OFFSET])
 
     def _get_result(self):
-        return MaxProbTTriesConfig(self.move_count, [prob(p) for p in self.probabilities])
+        return GameConfig([prob(p) for p in self.probabilities], self.additional_fields_vals)
