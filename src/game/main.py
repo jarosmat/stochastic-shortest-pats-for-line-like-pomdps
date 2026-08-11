@@ -16,13 +16,15 @@ def dict_from_max_t_tries_more_info(more_info: list):
 
     return res
 
+max_t_tries_game_msg =  ["The goal is to move as much matter to the final container",
+                         "Input number of moves, number of states and move probabilities"]
 
 def main():
     term = Terminal()
 
     selection_screen = NumberSelectionScreen(term, [MAX_PROB_T_TRIES_NUM_MOVES_SPEC],
-                                             ["The goal is to move as much matter to the final container",
-                                              "Input number of moves, number of states and move probabilities"])
+                                             max_t_tries_game_msg)
+
     game_screen = POMDPGameScreen(term)
     current_screen = selection_screen
 
