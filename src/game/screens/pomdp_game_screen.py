@@ -5,7 +5,6 @@ from blessed import Terminal
 from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
 
-from .game_results import GameResult
 from .game_type import GameType
 from .base import ScreenBase
 from .utils import display_percentage
