@@ -1,15 +1,10 @@
-from collections.abc import Callable
-from typing import TypeVar
-
 from blessed import Terminal
 from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
 
-from .game_type import GameType
 from .base import ScreenBase
 from .utils import display_percentage
-
-T = TypeVar('T')
+from .number_selection_screen import GameConfig
 
 
 class POMDPGameState(Enum):
@@ -29,25 +24,19 @@ class POMDPGameScreen(ScreenBase):
         self.states: int = 0
         self.belief: belief = belief(0)
         self.game_state = POMDPGameState.RUNNING
-        self.validator = None
         self.actions: list[int] = []
-        self.more_info = None
-        self.complete_drawer = None
-        self.extra_vals = dict()
+        self.spec = None
 
-    def set_config(self, extra_vals: dict[str, T], probs: list[prob], validator: Callable[[ScreenBase], None],
-                   more_info: Callable[[ScreenBase], None], complete_drawer: Callable[[ScreenBase], None]):
-        self.extra_vals = extra_vals
-        self.states = len(probs) + 1
-        self.pomdp = LineLikePomdp(probs)
+    def set_config(self, conf: GameConfig):
+        self.spec = conf.spec
+        self.states = len(conf.move_probs) + 1
+        self.pomdp = LineLikePomdp(conf.move_probs)
         self.reset_game()
-        self.validator = validator
-        self.more_info = more_info
-        self.complete_drawer = complete_drawer
 
     def reset_game(self):
         self.belief = belief([prob(0.0) for _ in range(self.states)])
         self.belief[0] = prob(1.0)
+        self.states = len(self.belief)
         self.actions = []
         self.input_buffer = ""
         self.game_state = POMDPGameState.RUNNING
@@ -68,7 +57,7 @@ class POMDPGameScreen(ScreenBase):
         except RuntimeError:
             self._set_error_msg(f"Invalid Action: {action_idx}")
 
-        if callable(self.validator) and self.validator(self):
+        if self.spec.game_validate(self):
             self.game_state = POMDPGameState.COMPLETE
 
         self.input_buffer = ""
@@ -131,13 +120,12 @@ class POMDPGameScreen(ScreenBase):
         print()
 
     def _draw_more_info(self):
-        if callable(self.more_info):
-            self.more_info(self)
-            print()
+        if self.spec is not None:
+            self.spec.game_write_more_info(self)
 
     def _draw_complete_msg(self):
-        if callable(self.complete_drawer):
-            self.complete_drawer(self)
+        if self.spec is not None:
+            self.spec.game_write_completed_info(self)
 
     def _draw_running(self):
         self._draw_header()
@@ -167,7 +155,7 @@ class POMDPGameScreen(ScreenBase):
 
         if key.name == "KEY_ENTER" or key.code == 10:
             self._apply_action_from_input()
-            return self._get_complete()
+            return self._get_incomplete()
         elif key.lower() == "r":
             self.reset_game()
             return self._get_incomplete()
@@ -179,13 +167,8 @@ class POMDPGameScreen(ScreenBase):
 
         return self._get_incomplete()
 
-    def _handle_enter(self):
-        self._apply_action_from_input()
-
-        if callable(self.validator) and self.validator(self):
-            return self._get_complete()
-
-        return self._get_incomplete()
-
     def _get_result(self):
-        return GameResult(GameType.MAX_PROB_T_TRIES, self.pomdp, self.belief, self.actions)
+        return None
+
+    def actions_taken_count(self) -> int:
+        return len(self.actions)

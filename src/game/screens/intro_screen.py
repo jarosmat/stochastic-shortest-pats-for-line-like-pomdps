@@ -1,17 +1,17 @@
 from .base import ScreenBase
 from blessed import Terminal
-from .game_type import GameType
+from .base_spec import BaseGameSpec
 
 
 class IntroScreen(ScreenBase):
 
-    def __init__(self, term: Terminal):
+    def __init__(self, term: Terminal, specs: list[BaseGameSpec]):
         super().__init__(term)
         self.current_field = 0
-        self.game_types = list(GameType)
+        self.specs = specs
 
-    def _get_result(self):
-        return self.game_types[self.current_field]
+    def _get_result(self) -> BaseGameSpec:
+        return self.specs[self.current_field]
 
     def _draw_header(self):
         print(self.term.clear())
@@ -21,22 +21,20 @@ class IntroScreen(ScreenBase):
     def _draw_menu(self):
         print(self.term.center("Select game type:"))
         print()
-        for i, game_type in enumerate(self.game_types):
+        for i, spec in enumerate(self.specs):
+            desc = spec.intro_game_description()
             if i == self.current_field:
-                print(self.term.center(f"  {self.term.reverse('->')} {game_type.name.replace('_', ' ').title()}"))
+                print(self.term.center(f"  {self.term.reverse('->')} {desc}"))
             else:
-                print(self.term.center(f"  {game_type.name.replace('_', ' ').title()}"))
+                print(self.term.center(f"  {desc}"))
         print()
         print(self.term.center("Use arrow keys to select, Enter to confirm, Q to quit"))
 
-
-    def _get_field_count(self):
-        return len(self.game_types)
+    def _get_field_count(self) -> int:
+        return len(self.specs)
 
     def _move_field(self, move_count: int):
         self.current_field = (self.current_field + move_count) % self._get_field_count()
-
-
 
     def draw(self):
         self._draw_header()

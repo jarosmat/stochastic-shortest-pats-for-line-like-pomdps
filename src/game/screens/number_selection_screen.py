@@ -5,12 +5,13 @@ from blessed import Terminal
 from enum import Enum
 from pypomdp import prob
 from .base import ScreenBase
+from .base_spec import BaseGameSpec
 
 
 class GameConfig:
-    def __init__(self, move_probs: list[prob], additional_info):
+    def __init__(self, move_probs: list[prob], spec: BaseGameSpec):
         self.move_probs: list[prob] = move_probs
-        self.additional_info = additional_info
+        self.spec = spec
 
 
 T = TypeVar('T')
@@ -27,20 +28,16 @@ class NumberSelectionScreen(ScreenBase):
 
     PROB_FIELDS_OFFSET = 2
 
-    class InputFieldTypes(Enum):
-        INTEGER = 0
-        PROBABILITY = 1
-
-    def __init__(self, term: Terminal, additional_fields: list[tuple[str, T, Callable[[str], T]]], game_msg: list[str]):
+    def __init__(self, term: Terminal, spec: BaseGameSpec):
         super().__init__(term)
+        self.spec = spec
         self.state_count = NumberSelectionScreen.DEF_STATE_COUNT
         self.probabilities = [NumberSelectionScreen.DEF_PROB for _ in range(self.state_count - 1)]
         self.current_field = 0
-        self.additional_fields = additional_fields
-        self.STATE_COUNT_FIELD = len(additional_fields)
+        self.additional_fields = spec.select_additional_fields_specs()
+        self.STATE_COUNT_FIELD = len(self.additional_fields)
         self.additional_fields_vals = [self.additional_fields[i][1] for i in range(self.STATE_COUNT_FIELD)]
         self.PROB_FIELDS_OFFSET = self.STATE_COUNT_FIELD + 1
-        self.game_msg = game_msg
         self._load_field_input()
 
     def _get_field_value(self, idx: int):
@@ -78,9 +75,7 @@ class NumberSelectionScreen(ScreenBase):
         print(self.term.center(self.term.bold("Set the game options")))
         print()
 
-        for msg in self.game_msg:
-            print(self.term.center(msg))
-            print()
+        self.spec.select_write_game_msg(self)
 
         print(self.term.center("Type numbers, Tab: next field, Enter: submit, Q: quit"))
         print()
@@ -208,4 +203,5 @@ class NumberSelectionScreen(ScreenBase):
             self.input_buffer = self._display_value(self.probabilities[self.current_field - self.PROB_FIELDS_OFFSET])
 
     def _get_result(self):
-        return GameConfig([prob(p) for p in self.probabilities], self.additional_fields_vals)
+        self.spec.set_more_info(self.additional_fields_vals)
+        return GameConfig([prob(p) for p in self.probabilities], self.spec)
