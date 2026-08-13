@@ -54,6 +54,7 @@ class POMDPGameScreen(ScreenBase):
             return
         try:
             self._apply_action_by_index(action_idx)
+            self._clear_error_msg()
         except RuntimeError:
             self._set_error_msg(f"Invalid Action: {action_idx}")
 
