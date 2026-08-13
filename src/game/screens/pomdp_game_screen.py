@@ -156,12 +156,19 @@ class POMDPGameScreen(ScreenBase):
         if key.name == "KEY_ENTER" or key.code == 10:
             self._apply_action_from_input()
             return self._get_incomplete()
-        elif key.lower() == "r":
+
+        if key.name == "KEY_BACKSPACE" or key.code == 127:
+            self._delete_char()
+            return self._get_incomplete()
+
+        if key.lower() == "r":
             self.reset_game()
             return self._get_incomplete()
-        elif key.lower() == "q":
+
+        if key.lower() == "q":
             return self._get_exit()
-        elif key.isdigit():
+
+        if key.isdigit():
             self.input_buffer += key
             return self._get_incomplete()
 
@@ -172,3 +179,7 @@ class POMDPGameScreen(ScreenBase):
 
     def actions_taken_count(self) -> int:
         return len(self.actions)
+
+    def _delete_char(self):
+        if self.input_buffer != '':
+            self.input_buffer = self.input_buffer[:-1]
