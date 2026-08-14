@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar
 from collections.abc import Callable
+from multiprocessing import Event
+
+from pypomdp import LineLikePomdp
 
 T = TypeVar('T')
 
@@ -32,4 +35,8 @@ class BaseGameSpec(ABC):
 
     @abstractmethod
     def set_more_info(self, info_vals: list):
+        pass
+
+    @abstractmethod
+    def calculate_best_res(self, stop_event: Event, pomdp: LineLikePomdp):
         pass

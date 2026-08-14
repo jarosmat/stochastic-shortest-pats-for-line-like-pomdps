@@ -1,5 +1,7 @@
 from typing import TypeVar
 from collections.abc import Callable
+from multiprocessing import Event
+from pypomdp import LineLikePomdp
 
 from .base_spec import BaseGameSpec
 from .utils import display_percentage
@@ -54,3 +56,6 @@ class MaxProbTTriesSpec(BaseGameSpec):
     def set_more_info(self, info_vals: list):
         if len(info_vals) != 0 and isinstance(info_vals[0], int):
             self.tries_count = info_vals[0]
+
+    def calculate_best_res(self, stop_event: Event, pomdp: LineLikePomdp):
+        pass
