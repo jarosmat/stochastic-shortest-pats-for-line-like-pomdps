@@ -9,6 +9,7 @@ set(POLICIES_DIR "${PROJECT_SOURCE_DIR}/policies")
 set(PROB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/probability")
 set(BELIEF_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/belief")
 set(LINE_LIKE_POMDP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/pomdps")
+set(GAME_SOLVERS_DIR "${PROJECT_SOURCE_DIR}/game-solvers")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -61,3 +62,4 @@ add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
 add_subdirectory("${POLICIES_DIR}")
+add_subdirectory("${GAME_SOLVERS_DIR}")
