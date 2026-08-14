@@ -14,6 +14,7 @@ class MinMovesBeforeThresholdSpec(BaseGameSpec):
     MAX_THRESHOLD = 0.8
 
     def __init__(self):
+        super().__init__()
         self.threshold = self.DEF_THRESHOLD
 
     def intro_game_description(self) -> str:
@@ -62,5 +63,9 @@ class MinMovesBeforeThresholdSpec(BaseGameSpec):
         if len(info_vals) != 0 and isinstance(info_vals[0], float):
             self.threshold = prob(info_vals[0])
 
-    def calculate_best_res(self, stop_event: Event, pomdp: LineLikePomdp):
-        pass
+    def calculate_best_res(self, stop_event: Event, move_probs: list[float]):
+        from pypomdp import prob, LineLikePomdp
+        pomdp = LineLikePomdp([prob(p) for p in move_probs])
+        # TODO: Implement computation, check stop_event.is_set() periodically
+        # result = compute_something(pomdp, stop_event)
+        # self.result_queue.put(result)
