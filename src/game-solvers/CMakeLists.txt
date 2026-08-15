@@ -8,5 +8,5 @@ target_include_directories(MaxProbTTriesSolver PUBLIC "${LINE_LIKE_POMDP_DIR}" "
 target_link_libraries(MaxProbTTriesSolver PUBLIC Prob LinePOMDP Belief Quantifier ExpandedPolicy)
 
 add_library(MinMovesBeforeThresholdSolver min_moves_before_threshold_solver.cpp)
-target_include_directories(MinMovesBeforeThresholdSolver PUBLIC "${LINE_LIKE_POMDP_DIR}" "${PROB_DIR}" "${BELIEF_DIR}" "${PERIODIC_POL_DIR}")
-target_link_libraries(MinMovesBeforeThresholdSolver PUBLIC Prob LinePOMDP Belief PeriodicPolicy)
+target_include_directories(MinMovesBeforeThresholdSolver PUBLIC "${LINE_LIKE_POMDP_DIR}" "${PROB_DIR}" "${BELIEF_DIR}"  "${QUANTIFIER_DIRECTORY}" "${PERIODIC_POL_DIR}")
+target_link_libraries(MinMovesBeforeThresholdSolver PUBLIC Prob LinePOMDP Belief PeriodicPolicy Quantifier)
