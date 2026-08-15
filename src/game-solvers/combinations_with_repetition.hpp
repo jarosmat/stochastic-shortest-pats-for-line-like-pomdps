@@ -5,13 +5,6 @@
 
 
 namespace detail {
-    template<typename It>
-    class empty_sentinel {
-    public:
-        empty_sentinel() = default;
-    };
-
-
     template<std::ranges::view V>
     class combination_iterator {
         using val_t = std::ranges::range_value_t<V>;
@@ -38,7 +31,7 @@ namespace detail {
             }
         }
 
-        const std::vector<val_t> &operator*() const {
+        const value_type &operator*() const {
             return current_;
         }
 
@@ -75,24 +68,24 @@ namespace detail {
             return tmp;
         }
 
-        friend bool operator==(const combination_iterator &it, const empty_sentinel<combination_iterator> &) {
+        friend bool operator==(const combination_iterator &it, const std::default_sentinel_t &) {
             return it.done_;
         }
     };
 }
 
-template<std::ranges::range V>
-class combinations_with_repetition_view : public std::ranges::view_interface<combinations_with_repetition_view<V> > {
-    V base_;
+template<std::ranges::range R>
+class combinations_with_repetition_view : public std::ranges::view_interface<combinations_with_repetition_view<R> > {
+    R base_;
     std::size_t r_ = 0;
 
 public:
-    using iterator = detail::combination_iterator<V>;
-    using sentinel = detail::empty_sentinel<iterator>;
+    using iterator = detail::combination_iterator<R>;
+    using sentinel = std::default_sentinel_t;
 
     combinations_with_repetition_view() = default;
 
-    combinations_with_repetition_view(V base, const std::size_t r)
+    combinations_with_repetition_view(R base, const std::size_t r)
         : base_(std::move(base)), r_(r) {
     }
 
@@ -108,37 +101,27 @@ public:
         return sentinel{};
     }
 
-    sentinel end() const {
+    [[nodiscard]] sentinel end() const {
         return sentinel{};
     }
 };
 
 
 template<class R>
-combinations_with_repetition_view(R&&, std::size_t) -> combinations_with_repetition_view<std::ranges::views::all_t<R>>;
+combinations_with_repetition_view(
+    R &&, std::size_t) -> combinations_with_repetition_view<std::ranges::views::all_t<R> >;
 
 struct combinations_with_repetition : std::ranges::range_adaptor_closure<combinations_with_repetition> {
     explicit combinations_with_repetition(const std::size_t r) : r_(r) {
     }
 
     template<std::ranges::viewable_range R>
-    auto operator()(R &&rng) const {
+    constexpr auto operator()(R &&rng) const {
         return combinations_with_repetition_view(std::views::all(std::forward<R>(rng)), r_);
-        // return combinations_with_repetition_view<
-        //     std::ranges::views::all_t<R> >(
-        //     std::forward<R>(rng), r_);
     }
 
 private:
     std::size_t r_;
 };
-
-// template<std::ranges::range R>
-// auto combinations_with_repetition(R &&rng, std::size_t r) {
-//     return combinations_with_repetition_view<
-//         std::ranges::views::all_t<R> >(
-//         std::forward<R>(rng), r);
-// }
-
 
 #endif //INC_2026_JAROS_COMBINATIONS_WITH_REPETITION
