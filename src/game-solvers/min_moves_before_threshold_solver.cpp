@@ -1,5 +1,6 @@
 #include "min_moves_before_threshold_solver.hpp"
-
+#include "permutations_with_repetition.hpp"
+#include "quantifier.hpp"
 #include <queue>
 
 namespace {
@@ -29,7 +30,7 @@ static void add_new_moves(const lineLikePomdp &pomdp, std::queue<queue_e> &queue
     }
 }
 
-static std::vector<queue_e> get_best_counts(const lineLikePomdp &pomdp, const prob threshold, const belief &start_b) {
+static queue_e get_best_counts(const lineLikePomdp &pomdp, const prob threshold, const belief &start_b) {
     const auto moves{start_b.bel.size()};
     std::queue<queue_e> queue;
     queue.emplace(std::vector<std::size_t>(moves, 0), start_b, 0, 0);
@@ -38,18 +39,28 @@ static std::vector<queue_e> get_best_counts(const lineLikePomdp &pomdp, const pr
         add_new_moves(pomdp, queue);
     }
 
-
-    auto [pol, bel, exp, stps] = std::move(queue.front());
+    auto res{std::move(queue.front())};
+    auto &[pol, bel, exp, stps]{res};
     queue.pop();
-    std::vector<queue_e> res;
-    res.emplace_back(std::move(pol), std::move(bel), exp / threshold, stps);
 
     while (!queue.empty() && queue.front().steps == stps) {
-        if (auto [used_n, bel_n, exp_n, steps_n] = std::move(queue.front());
-            pomdp.IsAtEndProb(bel_n, threshold) && exp_n / threshold < res.back().expectation) {
-            res.emplace_back(std::move(used_n), std::move(bel_n), exp_n / threshold, stps);
+        if (auto &[used_n, bel_n, exp_n, steps_n]{queue.front()};
+            pomdp.IsAtEndProb(bel_n, threshold) && exp_n / threshold < res.expectation) {
+            res = std::move(queue.front());
         }
         queue.pop();
+    }
+
+    return res;
+}
+
+static std::vector<std::pair<std::size_t, std::size_t> >
+get_counts_transformed(const std::vector<std::size_t> &counts) {
+    std::vector<std::pair<std::size_t, std::size_t> > res;
+    const auto size_c{counts.size()};
+    res.reserve(size_c);
+    for (auto i{0uz}; i < size_c; ++i) {
+        res.emplace_back(i, counts[i]);
     }
 
     return res;
@@ -58,7 +69,26 @@ static std::vector<queue_e> get_best_counts(const lineLikePomdp &pomdp, const pr
 std::pair<periodicPolicy, std::size_t> min_moves_before_threshold_solver::solve(
     const lineLikePomdp &pomdp, const prob threshold,
     const belief &start_b) {
-    auto best_counts{get_best_counts(pomdp, threshold, start_b)};
+    auto [counts, _, exp, steps]{get_best_counts(pomdp, threshold, start_b)};
+    auto transformed{get_counts_transformed(counts)};
 
-    
+    auto transformer = [&start_b, &pomdp, threshold]<typename P>(
+        P &&perm) -> std::pair<periodicPolicy, std::pair<std::size_t, double> > {
+        auto pol{periodicPolicy(std::forward<P>(perm))};
+        auto bel{start_b};
+        auto res{quantify_steps_until_threshold_m(std::move(bel), pomdp, pol, threshold)};
+        return {std::move(pol), res};
+    };
+
+    auto max_lambda = [](const auto &left, const auto &right) {
+        if (left.second.first == right.second.first) {
+            return left.second.second < right.second.second;
+        }
+        return left.second.first > right.second.first;
+    };
+
+    auto results = transformed | permutations_with_repetition{} | std::views::transform(transformer);
+    auto [pol, pol_metrics]{std::ranges::max(results, max_lambda)};
+
+    return {std::move(pol), pol_metrics.first};
 }
