@@ -3,6 +3,9 @@
 
 
 bool expanded_policy::is_last_val() const {
+    if (pol_.empty()) {
+        return to_return_ == max_val_;
+    }
     if (max_val_ <= pol_.back()) {
         return current_index_ == pol_.size() - 1 && !is_first_;
     }
@@ -17,6 +20,10 @@ expanded_policy::value_type expanded_policy::operator*() const {
 expanded_policy &expanded_policy::operator++() {
     if (is_last_val()) {
         reset();
+        return *this;
+    }
+    if (pol_.empty()) {
+        ++to_return_;
         return *this;
     }
 
