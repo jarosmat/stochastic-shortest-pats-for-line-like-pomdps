@@ -10,6 +10,8 @@ set(PROB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/probability")
 set(BELIEF_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/belief")
 set(LINE_LIKE_POMDP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/performace-quantifier/pomdps")
 set(GAME_SOLVERS_DIR "${PROJECT_SOURCE_DIR}/game-solvers")
+set(PERIODIC_POL_DIR "${POLICIES_DIR}/periodic-policy")
+set(EXPANDED_POL_DIR "${POLICIES_DIR}/expanded-policy")
 
 include(FetchContent)
 FetchContent_Declare(
