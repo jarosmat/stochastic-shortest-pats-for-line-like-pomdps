@@ -47,7 +47,16 @@ pybind11_add_module(pypomdp python_bindings.cpp
         "${BELIEF_DIR}/belief.cpp"
         "${LINE_LIKE_POMDP_DIR}/lineLikePomdp.cpp"
 )
-target_link_libraries(pypomdp PRIVATE Python3::Python)
+target_link_libraries(pypomdp PRIVATE
+        Python3::Python
+        Prob
+        Belief
+        LinePOMDP
+        MaxProbTTriesSolver
+        MinMovesBeforeThresholdSolver
+        PeriodicPolicy
+        ExpandedPolicy
+)
 target_include_directories(pypomdp PRIVATE
         ${NUMPY_INCLUDE_DIR}
         ${matplotlib-cpp_SOURCE_DIR}

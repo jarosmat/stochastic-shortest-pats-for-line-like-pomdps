@@ -6,6 +6,10 @@
 #include "prob.hpp"
 #include "belief.hpp"
 #include "lineLikePomdp.hpp"
+#include "max_prob_t_tries_solver.hpp"
+#include "min_moves_before_threshold_solver.hpp"
+#include "expandedPolicy.hpp"
+#include "periodicPolicy.hpp"
 
 namespace py = pybind11;
 
@@ -79,4 +83,40 @@ PYBIND11_MODULE(pypomdp, m) {
                  py::arg("bel"), py::arg("threshold"))
             .def("prob_at_end", &lineLikePomdp::ProbAtEnd,
                  py::arg("bel"));
+
+    py::class_<expanded_policy>(m, "ExpandedPolicy")
+            .def(py::init<const std::vector<std::size_t> &, std::size_t>(),
+                 py::arg("policy"), py::arg("max_v"))
+            .def("reset", &expanded_policy::reset)
+            .def("current", [](const expanded_policy &p) { return *p; })
+            .def("__iter__", [](expanded_policy &p) -> expanded_policy& { return p; })
+            .def("__next__", [](expanded_policy &p) -> std::size_t {
+                const auto res{*p};
+                ++p;
+                return res;
+            });
+
+    py::class_<periodicPolicy>(m, "PeriodicPolicy")
+            .def(py::init<const std::vector<std::size_t> &>(), py::arg("policy"))
+            .def("reset", &periodicPolicy::reset)
+            .def("current", [](const periodicPolicy &p) { return *p; })
+            .def("__iter__", [](periodicPolicy &p) -> periodicPolicy& { return p; })
+            .def("__next__", [](periodicPolicy &p) -> std::size_t {
+                const auto res{*p};
+                ++p;
+                return res;
+            })
+            .def("len", &periodicPolicy::len);
+
+    m.def("max_prob_t_tries_solve",
+          [](const lineLikePomdp &pomdp, const std::size_t t, const belief &bel) {
+              return max_prob_t_tries_solver::solve(pomdp, t, bel);
+          },
+          py::arg("pomdp"), py::arg("t"), py::arg("start_b"));
+
+    m.def("min_moves_before_threshold_solve",
+          [](const lineLikePomdp &pomdp, const prob threshold, const belief &start_b) {
+              return min_moves_before_threshold_solver::solve(pomdp, threshold, start_b);
+          },
+          py::arg("pomdp"), py::arg("threshold"), py::arg("start_b"));
 }
