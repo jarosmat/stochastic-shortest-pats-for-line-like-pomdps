@@ -17,7 +17,7 @@ include(FetchContent)
 FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.4.0
+        GIT_TAG v3.4.0
 )
 FetchContent_MakeAvailable(Catch2)
 
@@ -27,7 +27,7 @@ include(FetchContent)
 FetchContent_Declare(
         matplotlib-cpp
         GIT_REPOSITORY https://github.com/lava/matplotlib-cpp.git
-        GIT_TAG        master
+        GIT_TAG master
 )
 FetchContent_MakeAvailable(matplotlib-cpp)
 
@@ -38,22 +38,25 @@ execute_process(
         OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-if(NOT NUMPY_INCLUDE_DIR)
+if (NOT NUMPY_INCLUDE_DIR)
     message(FATAL_ERROR "NumPy headers not found. Install numpy: pip install numpy")
-endif()
+endif ()
 
 pybind11_add_module(pypomdp python_bindings.cpp
-    "${PROB_DIR}/prob.cpp"
-    "${BELIEF_DIR}/belief.cpp"
-    "${LINE_LIKE_POMDP_DIR}/lineLikePomdp.cpp"
+        "${PROB_DIR}/prob.cpp"
+        "${BELIEF_DIR}/belief.cpp"
+        "${LINE_LIKE_POMDP_DIR}/lineLikePomdp.cpp"
 )
 target_link_libraries(pypomdp PRIVATE Python3::Python)
-target_include_directories(pypomdp PRIVATE 
-    ${NUMPY_INCLUDE_DIR} 
-    ${matplotlib-cpp_SOURCE_DIR}
-    ${PROB_DIR}
-    ${BELIEF_DIR}
-    ${LINE_LIKE_POMDP_DIR}
+target_include_directories(pypomdp PRIVATE
+        ${NUMPY_INCLUDE_DIR}
+        ${matplotlib-cpp_SOURCE_DIR}
+        ${PROB_DIR}
+        ${BELIEF_DIR}
+        ${LINE_LIKE_POMDP_DIR}
+        ${GAME_SOLVERS_DIR}
+        ${PERIODIC_POL_DIR}
+        ${EXPANDED_POL_DIR}
 )
 
 add_executable(my_app main.cpp)
