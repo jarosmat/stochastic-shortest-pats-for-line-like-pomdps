@@ -6,10 +6,10 @@
 
 
 std::pair<expanded_policy, prob> max_prob_t_tries_solver::solve(
-    const lineLikePomdp &pomdp, std::size_t t, const belief &bel) {
-    auto transform_lambda = [&pomdp, &bel, t](const auto &comb) -> std::pair<expanded_policy, prob> {
+    const lineLikePomdp &pomdp, std::size_t t, const belief &start_b) {
+    auto transform_lambda = [&pomdp, &start_b, t](const auto &comb) -> std::pair<expanded_policy, prob> {
         auto pol{expanded_policy(comb, 3)};
-        auto start_bel{bel};
+        auto start_bel{start_b};
         auto res{quantifyThreshold_m(std::move(start_bel), pomdp, t, pol).back()};
         return {std::move(pol), res};
     };
@@ -18,7 +18,7 @@ std::pair<expanded_policy, prob> max_prob_t_tries_solver::solve(
         return left.second < right.second;
     };
 
-    auto diff_mvs{bel.bel.size() - 1};
+    auto diff_mvs{start_b.bel.size() - 1};
     if (t < diff_mvs) {
         return {expanded_policy({}, diff_mvs), prob(0)};
     }
