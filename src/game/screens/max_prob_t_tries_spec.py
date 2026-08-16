@@ -1,7 +1,7 @@
 from typing import TypeVar
 from collections.abc import Callable
 from multiprocessing import Event
-from pypomdp import LineLikePomdp
+from pypomdp import LineLikePomdp, prob
 
 from .base_spec import BaseGameSpec
 from .utils import display_percentage
@@ -51,7 +51,14 @@ class MaxProbTTriesSpec(BaseGameSpec):
         res = screen.pomdp.prob_at_end(screen.belief)
         print(screen.term.center(f"You managed to move {display_percentage(res)} of matter to end state"))
         print()
-        print(screen.term.center("It is possible to move {some amount}"))
+        moves = self._get_best_moves()
+        if moves is None:
+            print(screen.term.center("Waiting for computation of best moves"))
+        else:
+            pol, per = moves
+            print(screen.term.center(f"It is possible to move {display_percentage(prob(per))}"))
+            print()
+            print(screen.term.center(f"Using moves: {pol}"))
         print()
 
     def set_more_info(self, info_vals: list):
@@ -59,9 +66,25 @@ class MaxProbTTriesSpec(BaseGameSpec):
             self.tries_count = info_vals[0]
 
     def calculate_best_res(self, stop_event: Event, move_probs: list[float]):
-        from pypomdp import prob, LineLikePomdp
-        pomdp = LineLikePomdp([prob(p) for p in move_probs])
-        # TODO: Implement computation, check stop_event.is_set() periodically
-        # result = compute_something(pomdp, stop_event)
-        # self.result_queue.put(result)
-        pass
+        from pypomdp import prob, LineLikePomdp, max_prob_t_tries_solve, belief
+        try:
+            pomdp = LineLikePomdp([prob(p) for p in move_probs])
+            bel_len = len(move_probs) + 1
+            bel_l = [prob(0) for _ in range(bel_len)]
+            if bel_len > 0:
+                bel_l[0] = prob(1)
+            start_bel = belief(bel_l)
+            result = max_prob_t_tries_solve(pomdp, self.tries_count, start_bel)
+            pol, bel = result
+            pol.reset()
+            last = 0
+            res_moves = []
+            for move in pol:
+                if move < last:
+                    break
+                last = move
+                res_moves.append(move)
+
+            self.result_queue.put((res_moves, float(bel)))
+        except Exception:
+            pass
