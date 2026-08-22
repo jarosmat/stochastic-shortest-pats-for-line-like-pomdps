@@ -106,44 +106,37 @@ class POMDPGameScreen(ScreenBase):
         return f"[{content}]"
 
     def _draw_header(self):
-        print(self.term.clear())
-        print(self.term.center(self.term.bold("POMDP LINE GAME")))
-        print()
+        self._clear_term()
+        self._write_line_center(self.term.bold("POMDP LINE GAME"))
 
     def _draw_containers(self):
-        print(self.term.center("States (containers with belief mass):"))
-        print()
+        self._write_line_center("States (containers with belief mass):")
         containers = []
         labels = []
         for i in range(self.states):
             containers.append(self._draw_container(self.belief[i]))
             labels.append(f"[{i}]")
 
-        print(self.term.center(" ".join(containers)))
-        print()
+        self._write_line_center(" ".join(containers))
 
     def _draw_belief(self):
-        print(self.term.center("Belief:"))
+        self._write_line_center("Belief:", False)
         belief_strs = []
         for i in range(self.states):
             prob_percent = display_percentage(self.belief[i])
             belief_strs.append(f"S{i}={prob_percent}")
-        print(self.term.center("  ".join(belief_strs)))
-        print()
+        self._write_line_center("  ".join(belief_strs))
 
     def _draw_info(self):
-        print(self.term.center(
-            f"Actions taken: {self.actions}, Possible actions: [0-{self.states - 2}]"))
-        print()
+        self._write_line_center(
+            f"Actions taken: {self.actions}, Possible actions: [0-{self.states - 2}]")
 
     def _draw_input_buffer(self):
         action = f'[{self.input_buffer}]'
-        print(self.term.center(action))
-        print()
+        self._write_line_center(action)
 
     def _draw_controls(self):
-        print(self.term.center("R: Reset, Q: Quit"))
-        print()
+        self._write_line_center("R: Reset, Q: Quit")
 
     def _draw_more_info(self):
         if self.spec is not None:

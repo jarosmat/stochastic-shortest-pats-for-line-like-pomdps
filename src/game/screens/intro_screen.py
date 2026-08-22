@@ -15,20 +15,17 @@ class IntroScreen(ScreenBase):
 
     def _draw_header(self):
         print(self.term.clear())
-        print(self.term.center("Welcome to POMDP game"))
-        print()
+        self._write_line_center("Welcome to POMDP game")
 
     def _draw_menu(self):
-        print(self.term.center("Select game type:"))
-        print()
+        self._write_line_center("Select game type:")
+        self._write_line_center("Use arrow keys to select, Enter to confirm, Q to quit")
         for i, spec in enumerate(self.specs):
             desc = spec.intro_game_description()
             if i == self.current_field:
-                print(self.term.center(f"  {self.term.reverse('->')} {desc}"))
+                self._write_line_center(f"  {self.term.reverse('->')} {desc}", False)
             else:
-                print(self.term.center(f"  {desc}"))
-        print()
-        print(self.term.center("Use arrow keys to select, Enter to confirm, Q to quit"))
+                self._write_line_center(f"  {desc}", False)
 
     def _get_field_count(self) -> int:
         return len(self.specs)

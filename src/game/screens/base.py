@@ -35,8 +35,7 @@ class ScreenBase(ABC):
 
     def _draw_error(self):
         if not self._error_msg_empty():
-            print(self.term.center(self.term.bold_red(self._get_error_msg())))
-            print()
+            self._write_line_center(self.term.bold_red(self._get_error_msg()))
 
     @staticmethod
     def _get_incomplete():
@@ -54,3 +53,26 @@ class ScreenBase(ABC):
         if value is None:
             return ""
         return str(value)
+
+    def _write_lines_center(self, lines: list[str], newline = True):
+        for line in lines:
+            self._write_line_center(line, newline)
+
+    def _write_line_center(self, line: str, newline = True):
+        print(self.term.center(line))
+        if newline:
+            print()
+
+    def _write_lines_left(self, lines: list[str], newline = True):
+        for line in lines:
+            self._write_line_left(line, newline)
+
+    @staticmethod
+    def _write_line_left(line: str, newline = True):
+        print(line)
+        if newline:
+            print()
+
+    def _clear_term(self):
+        print(self.term.clear())
+

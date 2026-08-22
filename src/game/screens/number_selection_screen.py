@@ -52,12 +52,11 @@ class NumberSelectionScreen(ScreenBase):
 
     def _draw_input_field(self, msg: str, field_id: int):
         if msg is not None and msg != '':
-            print(self.term.bold(msg))
+            self._write_line_left(self.term.bold(msg), False)
         if self.current_field == field_id:
-            print(f"  [{self.term.reverse(self.input_buffer)}]")
+            self._write_line_left(f"  [{self.term.reverse(self.input_buffer)}]")
         else:
-            print(f"  [{self._display_value(self._get_field_value(field_id))}]")
-        print()
+            self._write_line_left(f"  [{self._display_value(self._get_field_value(field_id))}]")
 
     def _draw_state_selection(self):
         self._draw_input_field('Number of states', self.STATE_COUNT_FIELD)
@@ -71,14 +70,12 @@ class NumberSelectionScreen(ScreenBase):
         self._draw_prob_selection()
 
     def _draw_header(self):
-        print(self.term.clear())
-        print(self.term.center(self.term.bold("Set the game options")))
-        print()
+        self._clear_term()
+        self._write_line_center(self.term.bold("Set the game options"))
 
         self.spec.select_write_game_msg(self)
 
-        print(self.term.center("Type numbers, Tab: next field, Enter: submit, Q: quit"))
-        print()
+        self._write_line_center("Type numbers, Tab: next field, Enter: submit, Q: quit")
 
     def _draw_additional_info_selection(self):
         for i, val in enumerate(self.additional_fields):
