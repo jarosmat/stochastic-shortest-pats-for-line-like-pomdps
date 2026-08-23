@@ -1,5 +1,4 @@
 from blessed import Terminal
-from pypomdp import prob
 from typing import Literal
 
 from screens.number_selection_screen import NumberSelectionScreen

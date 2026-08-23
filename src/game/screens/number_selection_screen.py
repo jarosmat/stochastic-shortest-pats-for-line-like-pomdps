@@ -1,8 +1,6 @@
-from collections.abc import Callable
 from typing import TypeVar
 
 from blessed import Terminal
-from enum import Enum
 from pypomdp import prob
 from .base import ScreenBase
 from specs.base_spec import BaseGameSpec

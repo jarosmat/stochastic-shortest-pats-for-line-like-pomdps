@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, List
+from typing import TypeVar
 from collections.abc import Callable
 from multiprocessing import Event, Queue
 from pypomdp import LineLikePomdp, belief
