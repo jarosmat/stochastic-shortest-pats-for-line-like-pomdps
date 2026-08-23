@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, List
 from collections.abc import Callable
 from multiprocessing import Event, Queue
+from pypomdp import LineLikePomdp, belief
 
 T = TypeVar('T')
 
@@ -16,23 +17,23 @@ class BaseGameSpec(ABC):
         pass
 
     @abstractmethod
-    def select_additional_fields_specs(self) -> List[tuple[str, T, Callable[[str], T]]]:
+    def select_additional_fields_specs(self) -> list[tuple[str, T, Callable[[str], T]]]:
         pass
 
     @abstractmethod
-    def select_write_game_msg(self, screen):
+    def select_write_game_msg(self) -> list[str]:
         pass
 
     @abstractmethod
-    def game_validate(self, screen) -> bool:
+    def game_validate(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> bool:
         pass
 
     @abstractmethod
-    def game_write_more_info(self, screen):
+    def game_write_more_info(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> list[str]:
         pass
 
     @abstractmethod
-    def game_write_completed_info(self, screen):
+    def game_write_completed_info(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> list[str]:
         pass
 
     @abstractmethod

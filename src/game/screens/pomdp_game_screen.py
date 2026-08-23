@@ -83,7 +83,7 @@ class POMDPGameScreen(ScreenBase):
         except RuntimeError:
             self._set_error_msg(f"Invalid Action: {action_idx}")
 
-        if self.spec.game_validate(self):
+        if self.spec.game_validate(self.pomdp, self.belief, self.actions):
             self.game_state = POMDPGameState.COMPLETE
 
         self.input_buffer = ""
@@ -140,11 +140,13 @@ class POMDPGameScreen(ScreenBase):
 
     def _draw_more_info(self):
         if self.spec is not None:
-            self.spec.game_write_more_info(self)
+            info = self.spec.game_write_more_info(self.pomdp, self.belief, self.actions)
+            self._write_lines_center(info)
 
     def _draw_complete_msg(self):
         if self.spec is not None:
-            self.spec.game_write_completed_info(self)
+            completed_info = self.spec.game_write_completed_info(self.pomdp, self.belief, self.actions)
+            self._write_lines_center(completed_info)
 
     def _draw_running(self):
         self._draw_header()

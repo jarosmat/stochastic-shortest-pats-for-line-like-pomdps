@@ -73,7 +73,8 @@ class NumberSelectionScreen(ScreenBase):
         self._clear_term()
         self._write_line_center(self.term.bold("Set the game options"))
 
-        self.spec.select_write_game_msg(self)
+        msg = self.spec.select_write_game_msg()
+        self._write_lines_center(msg)
 
         self._write_line_center("Type numbers, Tab: next field, Enter: submit, Q: quit")
 

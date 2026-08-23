@@ -1,6 +1,6 @@
 from typing import TypeVar
 from collections.abc import Callable
-from pypomdp import prob, LineLikePomdp
+from pypomdp import prob, LineLikePomdp, belief
 from multiprocessing import Event
 
 from .base_spec import BaseGameSpec
@@ -29,43 +29,37 @@ class MinMovesBeforeThresholdSpec(BaseGameSpec):
 
         return [("Amount of matter to move", self.DEF_THRESHOLD, converter)]
 
-    def select_write_game_msg(self, screen):
+    def select_write_game_msg(self) -> list[str]:
         msg = [
             "The goal is to move certain percentage of matter to final container in as few moves as possible",
             "Input the percentage to move, number of states and move probabilities"]
+        return msg
 
-        for mes in msg:
-            print(screen.term.center(mes))
-            print()
+    def game_validate(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> bool:
+        return pomdp.is_at_end_prob(bel, self.threshold)
 
-    def game_validate(self, screen) -> bool:
-        return screen.pomdp.is_at_end_prob(screen.belief, self.threshold)
-
-    def game_write_more_info(self, screen):
+    def game_write_more_info(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> list[str]:
         thr = self.threshold
-        bel = screen.pomdp.prob_at_end(screen.belief)
+        bel = pomdp.prob_at_end(bel)
+        more_info = [
+            f"Already moved: {display_percentage(bel)} of matter, to end the game you need to move {display_percentage(thr)} of matter"]
 
-        print(screen.term.center(
-            f"Already moved: {display_percentage(bel)} of matter, to end the game you need to move {display_percentage(thr)} of matter"))
-        print()
+        return more_info
 
-    def game_write_completed_info(self, screen):
-        print(screen.term.center("Game Complete!"))
-        print()
-        mvs = screen.actions_taken_count()
-        print(screen.term.center(
-            f"You managed to move {display_percentage(self.threshold)} of matter to end in {mvs} moves"))
-        print()
+    def game_write_completed_info(self, pomdp: LineLikePomdp, bel: belief, moves: list[int]) -> list[str]:
+        info = ["Game Complete!"]
+        mvs = len(moves)
+        info.append(f"You managed to move {display_percentage(self.threshold)} of matter to end in {mvs} moves")
         moves = self._get_best_moves()
         if moves is None:
-            print(screen.term.center("Waiting for computation of best moves"))
+            info.append("Waiting for computation of best moves")
         else:
             pol, pol_len = moves
-            print(screen.term.center(
-                f"It is possible to move {display_percentage(self.threshold)} of matter to last container in {pol_len} moves"))
-            print()
-            print(screen.term.center(f"Using moves: {pol}"))
-        print()
+            info.append(
+                f"It is possible to move {display_percentage(self.threshold)} of matter to last container in {pol_len} moves")
+            info.append(f"Using moves: {pol}")
+
+        return info
 
     def set_more_info(self, info_vals: list):
         if len(info_vals) != 0 and isinstance(info_vals[0], float):
