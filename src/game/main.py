@@ -2,11 +2,11 @@ from blessed import Terminal
 from pypomdp import prob
 from typing import Literal
 
-from screens.number_selection_screen import NumberSelectionScreen, GameConfig
+from screens.number_selection_screen import NumberSelectionScreen
 from screens.pomdp_game_screen import POMDPGameScreen
 from screens.intro_screen import IntroScreen
-from screens.max_prob_t_tries_spec import MaxProbTTriesSpec
-from screens.min_moves_before_threshold_spec import MinMovesBeforeThresholdSpec
+from specs.max_prob_t_tries_spec import MaxProbTTriesSpec
+from specs.min_moves_before_threshold_spec import MinMovesBeforeThresholdSpec
 from screens.screen_result import ScreenResult
 
 

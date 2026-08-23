@@ -4,7 +4,7 @@ from enum import Enum
 from pypomdp import prob, belief, LineLikePomdp
 
 from .base import ScreenBase
-from .utils import display_percentage
+from utils.utils import display_percentage
 from .number_selection_screen import GameConfig
 
 

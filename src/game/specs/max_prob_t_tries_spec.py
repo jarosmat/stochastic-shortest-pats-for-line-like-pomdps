@@ -4,7 +4,7 @@ from multiprocessing import Event
 from pypomdp import LineLikePomdp, prob, belief
 
 from .base_spec import BaseGameSpec
-from .utils import display_percentage
+from utils.utils import display_percentage
 
 T = TypeVar('T')
 

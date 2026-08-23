@@ -1,6 +1,6 @@
 from .base import ScreenBase
 from blessed import Terminal
-from .base_spec import BaseGameSpec
+from specs.base_spec import BaseGameSpec
 
 
 class IntroScreen(ScreenBase):

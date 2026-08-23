@@ -5,7 +5,7 @@ from blessed import Terminal
 from enum import Enum
 from pypomdp import prob
 from .base import ScreenBase
-from .base_spec import BaseGameSpec
+from specs.base_spec import BaseGameSpec
 
 
 class GameConfig:
