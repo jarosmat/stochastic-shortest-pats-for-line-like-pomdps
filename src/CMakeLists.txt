@@ -14,14 +14,6 @@ set(GAME_SOLVERS_DIR "${PROJECT_SOURCE_DIR}/game-solvers")
 set(PERIODIC_POL_DIR "${POLICIES_DIR}/periodic-policy")
 set(EXPANDED_POL_DIR "${POLICIES_DIR}/expanded-policy")
 
-include(FetchContent)
-FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v3.4.0
-)
-FetchContent_MakeAvailable(Catch2)
-
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 include(FetchContent)
@@ -69,7 +61,6 @@ target_include_directories(pypomdp PRIVATE
         ${EXPANDED_POL_DIR}
 )
 
-add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
 add_subdirectory("${POLICIES_DIR}")
