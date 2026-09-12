@@ -41,7 +41,7 @@ std::vector<prob> plot_probs(std::vector<prob> &&probs, const std::size_t t) {
 }
 
 // returns index with maximum probability
-std::size_t max(const std::vector<prob>& vals) {
+std::size_t max(const std::vector<prob> &vals) {
     if (vals.empty()) {
         return 0;
     }
@@ -62,11 +62,12 @@ std::size_t max(const std::vector<prob>& vals) {
 // whose cartesian product will be used as two last probabilities
 // horizontal row is the last probability, vertical row is the second last probability
 // In the table number of A instructions is shown
-void plot_table(std::vector<prob> &&base_probs, std::vector<prob> && table_probs, const std::size_t t, std::ostream& stream) {
+void plot_table(std::vector<prob> &&base_probs, std::vector<prob> &&table_probs, const std::size_t t,
+                std::ostream &stream) {
     const auto t_size = table_probs.size();
 
     stream << '\t';
-    for (auto && p : table_probs) {
+    for (auto &&p: table_probs) {
         stream << "| " << p << " ";
     }
     stream << "|" << std::endl;
