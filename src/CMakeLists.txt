@@ -69,10 +69,6 @@ target_include_directories(pypomdp PRIVATE
         ${EXPANDED_POL_DIR}
 )
 
-add_executable(my_app main.cpp)
-target_link_libraries(my_app PRIVATE Python3::Python MaxProbTTriesSolver MinMovesBeforeThresholdSolver)
-target_include_directories(my_app PRIVATE ${NUMPY_INCLUDE_DIR} ${matplotlib-cpp_SOURCE_DIR} "${SOLVERS_DIR}")
-
 add_subdirectory("${TEST_DIRECTORY}")
 add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
