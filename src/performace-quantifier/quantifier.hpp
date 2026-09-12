@@ -3,7 +3,7 @@
 
 #include "prob.hpp"
 #include "belief.hpp"
-#include "goalPomdp.hpp"
+#include "lineLikePomdp.hpp"
 
 //this function is operating under the assumption, that sum of elements of probs is 1
 std::size_t sampleIndex(const std::vector<prob> &probs);

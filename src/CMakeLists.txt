@@ -61,7 +61,6 @@ target_include_directories(pypomdp PRIVATE
         ${EXPANDED_POL_DIR}
 )
 
-add_subdirectory("${PARSER_DIRECTORY}")
 add_subdirectory("${QUANTIFIER_DIRECTORY}")
 add_subdirectory("${POLICIES_DIR}")
 add_subdirectory("${GAME_SOLVERS_DIR}")
