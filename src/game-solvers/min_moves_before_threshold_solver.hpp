@@ -6,7 +6,7 @@
 
 class min_moves_before_threshold_solver {
 public:
-    static std::pair<periodicPolicy, std::pair<std::size_t, double>> solve(const lineLikePomdp& pomdp, prob threshold, const belief& start_b);
+    static std::pair<periodic_policy, std::pair<std::size_t, double>> solve(const line_like_pomdp& pomdp, prob threshold, const belief& start_b);
 };
 
 

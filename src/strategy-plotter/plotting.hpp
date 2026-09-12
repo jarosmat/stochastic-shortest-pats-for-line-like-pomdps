@@ -5,7 +5,7 @@
 #include "quantifier.hpp"
 
 
-periodicPolicy get_policy(const std::vector<std::size_t> &counts);
+periodic_policy get_policy(const std::vector<std::size_t> &counts);
 
 std::vector<prob> plot_probs(std::vector<prob> &&probs, std::size_t t);
 

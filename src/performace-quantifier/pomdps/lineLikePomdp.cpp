@@ -1,40 +1,40 @@
 #include "lineLikePomdp.hpp"
 
-lineLikePomdp::lineLikePomdp(std::vector<prob> &&probs) : states(probs.size() + 1), probs_(std::move(probs)) {
+line_like_pomdp::line_like_pomdp(std::vector<prob> &&probs) : states_(probs.size() + 1), probs_(std::move(probs)) {
 }
 
-lineLikePomdp::lineLikePomdp(const std::vector<prob> &probs) : states(probs.size() + 1), probs_(probs) {
+line_like_pomdp::line_like_pomdp(const std::vector<prob> &probs) : states_(probs.size() + 1), probs_(probs) {
 }
 
-belief lineLikePomdp::UpdateBelief(belief &&bel, const action action) const {
-    if (action >= states - 1) {
+belief line_like_pomdp::update_belief(belief &&bel, const action action) const {
+    if (action >= states_ - 1) {
         throw std::runtime_error("Invalid action");
     }
 
-    bel[action + 1] = bel[action + 1] + (probs_[action] * bel[action]);
+    bel[action + 1] = bel[action + 1] + probs_[action] * bel[action];
     bel[action] = bel[action] * (prob(1) - probs_[action]);
 
     return bel;
 }
 
-belief lineLikePomdp::UpdateBelief(const belief &bel, const action action) const {
+belief line_like_pomdp::update_belief(const belief &bel, const action action) const {
     belief res = bel;
-    return UpdateBelief(std::move(res), action);
+    return update_belief(std::move(res), action);
 }
 
-belief lineLikePomdp::SimulateAction(const action action, const state state) const {
-    if (state >= states) {
+belief line_like_pomdp::simulate_action(const action action, const state state) const {
+    if (state >= states_) {
         throw std::runtime_error("Invalid state");
     }
 
-    if (action >= states - 1) {
+    if (action >= states_ - 1) {
         throw std::runtime_error("Invalid action");
     }
 
-    auto res = belief(states);
+    auto res = belief(states_);
 
 
-    if (state == states - 1) {
+    if (state == states_ - 1) {
         res[state] = prob(1);
     }
 
@@ -49,30 +49,30 @@ belief lineLikePomdp::SimulateAction(const action action, const state state) con
     return res;
 }
 
-bool lineLikePomdp::IsFinalState(const state state) const {
-    return state == states - 1;
+bool line_like_pomdp::is_final_state(const state state) const {
+    return state == states_ - 1;
 }
 
-std::vector<prob> lineLikePomdp::GetFinalStatesProbs(belief &&bel) const {
-    return {bel[states - 1]};
+std::vector<prob> line_like_pomdp::get_final_states_probs(belief &&bel) const {
+    return {bel[states_ - 1]};
 }
 
-double lineLikePomdp::GetExpectedCost(const belief &belief, action a) const {
-    return 1.0 - static_cast<double>(belief[states - 1]);
+double line_like_pomdp::get_expected_cost(const belief &belief, action) const {
+    return 1.0 - static_cast<double>(belief[states_ - 1]);
 }
 
-bool lineLikePomdp::EndBelief(const belief &bel) const {
-    return bel[states - 1] == prob(1.0);
+bool line_like_pomdp::end_belief(const belief &bel) const {
+    return bel[states_ - 1] == prob(1.0);
 }
 
-std::size_t lineLikePomdp::States() const {
-    return states;
+std::size_t line_like_pomdp::states() const {
+    return states_;
 }
 
-bool lineLikePomdp::IsAtEndProb(const belief &bel, const prob prob) const {
-    return bel[states - 1] >= prob;
+bool line_like_pomdp::is_at_end_prob(const belief &bel, const prob prob) const {
+    return bel[states_ - 1] >= prob;
 }
 
-prob lineLikePomdp::ProbAtEnd(const belief &bel) const {
-    return bel[states - 1];
+prob line_like_pomdp::prob_at_end(const belief &bel) const {
+    return bel[states_ - 1];
 }

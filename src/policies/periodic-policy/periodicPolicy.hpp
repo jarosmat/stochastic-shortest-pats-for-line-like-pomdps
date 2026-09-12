@@ -3,9 +3,9 @@
 #include <vector>
 
 
-class periodicPolicy {
-    std::vector<std::size_t> pol;
-    std::size_t currIndex = 0;
+class periodic_policy {
+    std::vector<std::size_t> pol_;
+    std::size_t curr_index_ = 0;
 
 public:
     using value_type = std::size_t;
@@ -13,15 +13,15 @@ public:
 
     value_type operator*() const;
 
-    periodicPolicy &operator++();
+    periodic_policy &operator++();
 
     void operator++(int);
 
     void reset();
 
-    explicit periodicPolicy(std::vector<std::size_t> &&vec);
+    explicit periodic_policy(std::vector<std::size_t> &&vec);
 
-    explicit periodicPolicy(const std::vector<std::size_t> &vec);
+    explicit periodic_policy(const std::vector<std::size_t> &vec);
 
     [[nodiscard]] std::size_t len() const;
 };

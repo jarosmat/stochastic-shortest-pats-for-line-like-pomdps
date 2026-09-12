@@ -1,7 +1,6 @@
 #ifndef INC_2026_JAROS_PERMUTATIONS_WITH_REPETITION_HPP
 #define INC_2026_JAROS_PERMUTATIONS_WITH_REPETITION_HPP
 
-#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <ranges>
@@ -35,7 +34,7 @@ namespace detail {
 
         permutation_iterator() = default;
 
-        permutation_iterator(V elements) {
+        explicit permutation_iterator(V elements) {
             for (auto &&[item, count]: elements) {
                 for (auto i{0uz}; i < static_cast<std::size_t>(count); ++i) {
                     current_perm_.push_back(item);
@@ -99,7 +98,7 @@ public:
         return sentinel{};
     }
 
-    sentinel end() const {
+    [[nodiscard]] sentinel end() const {
         return sentinel{};
     }
 };

@@ -1,6 +1,6 @@
 #include "belief.hpp"
 
-prob & belief::operator[](std::size_t i) {
+prob & belief::operator[](const std::size_t i) {
     return bel.at(i);
 }
 

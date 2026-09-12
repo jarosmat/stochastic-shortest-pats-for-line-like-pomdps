@@ -10,7 +10,7 @@ class expanded_policy {
     bool is_first_{true};
     std::size_t max_val_;
 
-    bool is_last_val() const;
+    [[nodiscard]] bool is_last_val() const;
 
 public:
     using value_type = std::size_t;

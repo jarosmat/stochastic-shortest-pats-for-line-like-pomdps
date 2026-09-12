@@ -1,31 +1,31 @@
 #include "periodicPolicy.hpp"
 
-periodicPolicy::value_type periodicPolicy::operator*() const {
-    return pol[currIndex];
+periodic_policy::value_type periodic_policy::operator*() const {
+    return pol_[curr_index_];
 }
 
-periodicPolicy &periodicPolicy::operator++() {
-    if (++currIndex >= pol.size()) {
-        currIndex = 0;
+periodic_policy &periodic_policy::operator++() {
+    if (++curr_index_ >= pol_.size()) {
+        curr_index_ = 0;
     }
 
     return *this;
 }
 
-void periodicPolicy::operator++(int) {
+void periodic_policy::operator++(int) {
     ++*this;
 }
 
-void periodicPolicy::reset() {
-    currIndex = 0;
+void periodic_policy::reset() {
+    curr_index_ = 0;
 }
 
-periodicPolicy::periodicPolicy(std::vector<std::size_t> &&vec): pol(std::move(vec)) {
+periodic_policy::periodic_policy(std::vector<std::size_t> &&vec): pol_(std::move(vec)) {
 }
 
-periodicPolicy::periodicPolicy(const std::vector<std::size_t> &vec): pol(vec) {
+periodic_policy::periodic_policy(const std::vector<std::size_t> &vec): pol_(vec) {
 }
 
-std::size_t periodicPolicy::len() const {
-    return pol.size();
+std::size_t periodic_policy::len() const {
+    return pol_.size();
 }

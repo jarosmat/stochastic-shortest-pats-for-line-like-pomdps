@@ -1,7 +1,6 @@
 #include <queue>
 
 #include "matplotlibcpp.h"
-#include "plotting.hpp"
 #include "quantifier.hpp"
 #include <chrono>
 
@@ -36,7 +35,7 @@ namespace {
 
 namespace {
     std::vector<queue_e> plot_percentile(const prob p1, const prob p2, prob threshold) {
-        const lineLikePomdp pomdp({p1, p2});
+        const line_like_pomdp pomdp({p1, p2});
 
         std::vector start_v{prob(1), prob(0), prob(0)};
         belief start_b(std::move(start_v));
@@ -44,7 +43,7 @@ namespace {
         std::queue<queue_e> queue;
         queue.emplace("", std::move(start_b), 0, 0);
 
-        while (!pomdp.IsAtEndProb(queue.front().bel, threshold)) {
+        while (!pomdp.is_at_end_prob(queue.front().bel, threshold)) {
             auto [pol, bel, exp, steps] = std::move(queue.front());
             queue.pop();
             auto pol_a{pol};
@@ -52,14 +51,14 @@ namespace {
             auto pol_b{std::move(pol)};
             pol_b.push_back('B');
 
-            auto prob_end{pomdp.ProbAtEnd(bel)};
+            auto prob_end{pomdp.prob_at_end(bel)};
 
-            belief n_bel_a{pomdp.UpdateBelief(bel, 0)};
-            belief n_bel_b{pomdp.UpdateBelief(std::move(bel), 1)};
+            belief n_bel_a{pomdp.update_belief(bel, 0)};
+            belief n_bel_b{pomdp.update_belief(std::move(bel), 1)};
 
             const auto new_steps{steps + 1};
-            double new_exp_a{exp + new_steps * (pomdp.ProbAtEnd(n_bel_a) - prob_end)};
-            double new_exp_b{exp + new_steps * (pomdp.ProbAtEnd(n_bel_b) - prob_end)};
+            double new_exp_a{exp + new_steps * (pomdp.prob_at_end(n_bel_a) - prob_end)};
+            double new_exp_b{exp + new_steps * (pomdp.prob_at_end(n_bel_b) - prob_end)};
 
             queue.emplace(std::move(pol_a), std::move(n_bel_a), new_exp_a, new_steps);
             queue.emplace(std::move(pol_b), std::move(n_bel_b), new_exp_b, new_steps);
@@ -73,7 +72,7 @@ namespace {
 
         while (!queue.empty() && queue.front().steps == stps) {
             if (auto [pol_n, bel_n, exp_n, steps_n] = std::move(queue.front());
-                pomdp.IsAtEndProb(bel_n, threshold) && exp_n / threshold < res.back().expectation) {
+                pomdp.is_at_end_prob(bel_n, threshold) && exp_n / threshold < res.back().expectation) {
                 res.emplace_back(std::move(pol_n), std::move(bel_n), exp_n / threshold, stps);
             }
             queue.pop();
@@ -121,7 +120,7 @@ namespace {
     std::vector<queue_e> plot_percentile_max(const prob p1, const prob p2, const prob threshold,
                                              std::size_t time_cutoff = 10) {
         auto start = std::chrono::steady_clock::now();
-        const lineLikePomdp pomdp({p1, p2});
+        const line_like_pomdp pomdp({p1, p2});
 
         std::vector start_v{prob(1), prob(0), prob(0)};
         belief start_b(std::move(start_v));
@@ -141,8 +140,8 @@ namespace {
                     return res;
                 }
             }
-            if (!pomdp.IsAtEndProb(bel, threshold)) {
-                if (!res.empty() && too_high_exp(res.back().expectation, exp, pomdp.ProbAtEnd(bel), threshold,
+            if (!pomdp.is_at_end_prob(bel, threshold)) {
+                if (!res.empty() && too_high_exp(res.back().expectation, exp, pomdp.prob_at_end(bel), threshold,
                                                  stps + 1)) {
                     continue;
                 }
@@ -152,14 +151,14 @@ namespace {
                 auto pol_b{std::move(pol)};
                 pol_b.push_back('B');
 
-                auto prob_end{pomdp.ProbAtEnd(bel)};
+                auto prob_end{pomdp.prob_at_end(bel)};
 
-                belief n_bel_a{pomdp.UpdateBelief(bel, 0)};
-                belief n_bel_b{pomdp.UpdateBelief(std::move(bel), 1)};
+                belief n_bel_a{pomdp.update_belief(bel, 0)};
+                belief n_bel_b{pomdp.update_belief(std::move(bel), 1)};
 
                 const auto new_steps{stps + 1};
-                double new_exp_a{exp + new_steps * (pomdp.ProbAtEnd(n_bel_a) - prob_end)};
-                double new_exp_b{exp + new_steps * (pomdp.ProbAtEnd(n_bel_b) - prob_end)};
+                double new_exp_a{exp + new_steps * (pomdp.prob_at_end(n_bel_a) - prob_end)};
+                double new_exp_b{exp + new_steps * (pomdp.prob_at_end(n_bel_b) - prob_end)};
 
                 queue.emplace(std::move(pol_a), std::move(n_bel_a), new_exp_a, new_steps);
                 queue.emplace(std::move(pol_b), std::move(n_bel_b), new_exp_b, new_steps);

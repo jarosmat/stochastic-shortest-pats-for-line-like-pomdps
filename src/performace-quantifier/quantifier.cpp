@@ -2,7 +2,7 @@
 
 #include <random>
 
-std::size_t sampleIndex(const std::vector<prob> &probs) {
+std::size_t sample_index(const std::vector<prob> &probs) {
     std::vector<prob> cdf(probs.size());
     auto sum = prob(0);
     for (std::size_t i = 0; i < probs.size(); ++i) {
@@ -12,9 +12,9 @@ std::size_t sampleIndex(const std::vector<prob> &probs) {
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dist(0.0, 1.0);
+    std::uniform_real_distribution dist(0.0, 1.0);
 
-    auto rnum = prob(dist(gen));
+    const auto rnum = prob(dist(gen));
 
     std::size_t i = 0;
     while (rnum > cdf[i] && i < probs.size()) {

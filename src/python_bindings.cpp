@@ -60,28 +60,28 @@ PYBIND11_MODULE(pypomdp, m) {
                 result += "])";
                 return result;
             });
-    py::class_<lineLikePomdp>(m, "LineLikePomdp")
+    py::class_<line_like_pomdp>(m, "LineLikePomdp")
             .def(py::init<std::vector<prob> >(), py::arg("probs"))
-            .def("update_belief", [](const lineLikePomdp &self, const belief &bel, const action a) {
-                return self.UpdateBelief(bel, a);
+            .def("update_belief", [](const line_like_pomdp &self, const belief &bel, const action a) {
+                return self.update_belief(bel, a);
             }, py::arg("bel"), py::arg("action"))
-            .def("update_belief_move", [](const lineLikePomdp &self, belief bel, const action a) {
-                return self.UpdateBelief(std::move(bel), a);
+            .def("update_belief_move", [](const line_like_pomdp &self, belief bel, const action a) {
+                return self.update_belief(std::move(bel), a);
             }, py::arg("bel"), py::arg("action"))
-            .def("simulate_action", &lineLikePomdp::SimulateAction,
+            .def("simulate_action", &line_like_pomdp::simulate_action,
                  py::arg("action"), py::arg("state"))
-            .def("is_final_state", &lineLikePomdp::IsFinalState,
+            .def("is_final_state", &line_like_pomdp::is_final_state,
                  py::arg("state"))
-            .def("get_final_states_probs", [](const lineLikePomdp &self, belief bel) {
-                return self.GetFinalStatesProbs(std::move(bel));
+            .def("get_final_states_probs", [](const line_like_pomdp &self, belief bel) {
+                return self.get_final_states_probs(std::move(bel));
             }, py::arg("bel"))
-            .def("get_expected_cost", &lineLikePomdp::GetExpectedCost,
+            .def("get_expected_cost", &line_like_pomdp::get_expected_cost,
                  py::arg("belief"), py::arg("a"))
-            .def("end_belief", &lineLikePomdp::EndBelief,
+            .def("end_belief", &line_like_pomdp::end_belief,
                  py::arg("bel"))
-            .def("is_at_end_prob", &lineLikePomdp::IsAtEndProb,
+            .def("is_at_end_prob", &line_like_pomdp::is_at_end_prob,
                  py::arg("bel"), py::arg("threshold"))
-            .def("prob_at_end", &lineLikePomdp::ProbAtEnd,
+            .def("prob_at_end", &line_like_pomdp::prob_at_end,
                  py::arg("bel"));
 
     py::class_<expanded_policy>(m, "ExpandedPolicy")
@@ -96,26 +96,26 @@ PYBIND11_MODULE(pypomdp, m) {
                 return res;
             });
 
-    py::class_<periodicPolicy>(m, "PeriodicPolicy")
+    py::class_<periodic_policy>(m, "PeriodicPolicy")
             .def(py::init<const std::vector<std::size_t> &>(), py::arg("policy"))
-            .def("reset", &periodicPolicy::reset)
-            .def("current", [](const periodicPolicy &p) { return *p; })
-            .def("__iter__", [](periodicPolicy &p) -> periodicPolicy& { return p; })
-            .def("__next__", [](periodicPolicy &p) -> std::size_t {
+            .def("reset", &periodic_policy::reset)
+            .def("current", [](const periodic_policy &p) { return *p; })
+            .def("__iter__", [](periodic_policy &p) -> periodic_policy& { return p; })
+            .def("__next__", [](periodic_policy &p) -> std::size_t {
                 const auto res{*p};
                 ++p;
                 return res;
             })
-            .def("len", &periodicPolicy::len);
+            .def("len", &periodic_policy::len);
 
     m.def("max_prob_t_tries_solve",
-          [](const lineLikePomdp &pomdp, const std::size_t t, const belief &bel) {
+          [](const line_like_pomdp &pomdp, const std::size_t t, const belief &bel) {
               return max_prob_t_tries_solver::solve(pomdp, t, bel);
           },
           py::arg("pomdp"), py::arg("t"), py::arg("start_b"));
 
     m.def("min_moves_before_threshold_solve",
-          [](const lineLikePomdp &pomdp, const prob threshold, const belief &start_b) {
+          [](const line_like_pomdp &pomdp, const prob threshold, const belief &start_b) {
               return min_moves_before_threshold_solver::solve(pomdp, threshold, start_b);
           },
           py::arg("pomdp"), py::arg("threshold"), py::arg("start_b"));

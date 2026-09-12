@@ -6,7 +6,7 @@
 
 class max_prob_t_tries_solver {
 public:
-    static std::pair<expanded_policy, prob> solve(const lineLikePomdp &pomdp, std::size_t t, const belief &start_b);
+    static std::pair<expanded_policy, prob> solve(const line_like_pomdp &pomdp, std::size_t t, const belief &start_b);
 };
 
 
