@@ -11,6 +11,7 @@ For building, the following packages must be installed:
 - `make`
 - C++ compiler
 - `python3`
+- `python3-dev`
 - `python3Packages.matplotlib`
 - `python3Packages.numpy`
 - `python3Packages.pybind11`
