@@ -19,4 +19,6 @@ For building, the following packages must be installed:
 
 To build the project, run
 
-```./build.sh```
+```bash 
+source build.sh
+```
