@@ -19,6 +19,12 @@ For building, the following packages must be installed:
 
 To build the project, run
 
-```bash 
+```shell 
 source build.sh
+```
+
+To run the game run:
+
+```shell
+./run_game.sh
 ```
