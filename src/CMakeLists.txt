@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 4.0)
 project(2026-jaros)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(TEST_DIRECTORY "${PROJECT_SOURCE_DIR}/Tests")
 set(PARSER_DIRECTORY "${PROJECT_SOURCE_DIR}/pomdp-parser")
 set(QUANTIFIER_DIRECTORY "${PROJECT_SOURCE_DIR}/performace-quantifier")
