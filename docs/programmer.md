@@ -11,8 +11,8 @@ the C++ solver.
 
 ### `performace-quantifier/`
 
-This folder contains most of the components for modeling POMDPs and for quantifying the performance of strategies.
-It is structured into three folders and files:
+This folder contains most of the components for modeling POMDPs and for quantifying the performance of strategies. It is
+structured into three folders and two files:
 
 - `belief`
 - `pomdps`
@@ -74,13 +74,15 @@ This folder contains classes for representation of POMDPs
     - only observations are whether we are in the final state or not
     - the final state is the last state in the line
     - `line_like_pomdp(std::vector<prob> &&probs)` - constructor, initializes POMDP with move probabilities between
+      states
     - `line_like_pomdp(const std::vector<prob> &probs)` - constructor, initializes POMDP with move probabilities between
+      states
     - `belief update_belief(belief &&bel, action action) const` - updates belief by applying action
     - `belief update_belief(const belief &bel, action action) const` - updates belief by applying action
     - `belief simulate_action(action action, state state) const` - simulates applying an action from a specific state
     - `bool is_final_state(state state) const` - returns true if the state is the final state
-    - `std::vector<prob> get_final_states_probs(belief &&bel) const` - returns probabilities of being in the final
-      states for each final state
+    - `std::vector<prob> get_final_states_probs(belief &&bel) const` - returns probabilities of being in the final state
+      for all final states
     - `double get_expected_cost(const belief &belief, action a) const` - returns expected cost of an action
     - `bool end_belief(const belief &bel) const` - returns true if probability of being in final state in belief `bel`
       is `1`
@@ -99,7 +101,7 @@ These files contain function templates for performance quantification.
 -
 
 `template<typename It, typename P> bool simulate_threshold(const belief &startb, const P &pomdp, const std::size_t t, It &policy)` -
-simulates a policy for `t` steps and returns whether final state was reached
+simulates a policy `policy` on POMDP `pomdp` for `t` steps and returns whether final state was reached
 
 -
 
@@ -114,17 +116,18 @@ quantifies the probability of reaching the final state with default 10000 repeti
 -
 
 `template<typename It, typename P> std::vector<prob> quantify_threshold_m(belief &&startb, const P &pomdp, const std::size_t t, It &policy)` -
-returns probabilities of being in final states after `t` steps
+returns probabilities of being in final states for all final states after `t` steps of policy `policy` on POMDP `pomdp`
 
 -
 
 `template<typename It, typename P> std::size_t simulate_expectation(const belief &startb, const P &pomdp, It &policy)` -
-simulates a policy and returns the number of steps taken to reach a final state
+simulates a policy `policy` on POMDP `pomdp` and returns the number of steps taken to reach a final state
 
 -
 
 `template<typename It, typename P> double quantify_expectation_s(const belief &startb, const P &pomdp, It &policy, const std::size_t reps)` -
-quantifies the expected number of steps before reaching final state by running `reps` simulations
+quantifies the expected number of steps before reaching final state by running `reps` simulations of policy `policy` on
+POMDP `pomdp`
 
 - `template<typename It, typename P> double quantify_expectation_s(const belief &startb, const P &pomdp, It &policy)` -
   quantifies the expected number of steps with default 10000 repetitions
@@ -132,20 +135,22 @@ quantifies the expected number of steps before reaching final state by running `
 -
 
 `template<typename It, typename P> std::pair<std::size_t, double> quantify_steps_until_threshold_m(belief &&startb, const P &pomdp, It &policy, prob threshold)` -
-returns a pair of steps taken and expected steps until threshold probability is reached
+returns a pair of steps taken and expected steps until threshold probability is reached, when applying policy `policy`
+on POMDP `pomdp`
 
 ### `game-solvers/`
 
-This folder contains function that compute the best strategies for POMDP game types.
+This folder contains functions that compute the best strategies for POMDP game types.
 
 #### `max_prob_t_tries_solver.hpp`
 
 - `class max_prob_t_tries_solver`
   -
   `static std::pair<expanded_policy, prob> solve(const line_like_pomdp &pomdp, std::size_t t, const belief &start_b)` -
-  searches strategies to find the one maximizing the probability of being in final state after `t` steps. Uses
-  `combinations_with_repetitions` to search all possible strategies. Uses combination with repetition because it is
-  not optimal to play action `j < i` after playing strategy `i`
+  searches strategies to find the one maximizing the probability of being in final state after `t` for POMDP `pomdp`.
+  Uses
+  `combinations_with_repetitions` to search all possible strategies. Uses combination with repetition because it is not
+  optimal to play action `j < i` after playing strategy `i`
 
 #### `min_moves_before_threshold_solver.hpp`
 
@@ -177,7 +182,7 @@ This folder contains function that compute the best strategies for POMDP game ty
     - `using value_type = std::vector<val_t>`
     - `const value_type &operator*() const` - returns current permutation
     - `permutation_iterator &operator++()` - advances to next permutation
-    - `permutation_iterator operator++(int)` - advances to next combination
+    - `permutation_iterator operator++(int)` - advances to next permuation
     - `friend bool operator==(const permutation_iterator &it, const std::default_sentinel_t)` - equality comparison
 - `class permutations_with_repetition_view<R>` - view class for permutations with repetition
     - `iterator begin() const` - returns iterator to first permutation
@@ -192,11 +197,10 @@ This folder contains the representations of policies.
 #### `expanded-policy/`
 
 This folder contains the representation of policy, that returns sorted integers from 0 to specified max value. Every
-value
-is returned at least once, it can be specified what values to play after one another by providing a sorted vector in
-non-decreasing order. For every value in the vector, it will be played once more than the times it is in the vector.
-For example: vector specified: `[0,1,2]` and maximum value: `3`, the policy will play `0,0,1,1,2,2,3`.
-or vector: `[0,2]`, maximum value `3`, the policy will play: `0,0,1,2,2,3`.
+value is returned at least once, it can be specified what values to play by providing a vector sorted in non-decreasing
+order. For every value in the vector, it will be played once more than the times it is in the vector. For example:
+vector specified: `[0,1,2]` and maximum value: `3`, the policy will play `0,0,1,1,2,2,3`. or vector:
+`[0,2]`, maximum value `3`, the policy will play: `0,0,1,2,2,3`.
 
 - `class expanded_policy`
     - `expanded_policy(std::vector<std::size_t> &&vec, std::size_t max_v)` - constructor, initializes with actions and
@@ -238,21 +242,21 @@ outputs a table of strategy probabilities
 #### `plotter.cpp`
 
 Executable that accepts exactly two arguments, first file with pairs of probabilities and second a number of steps. and
-computes the optimal count of first actions for each pair, when trying to have a strategy that has the biggest
-probability of being in final state after specified number of moves.
+computes the optimal count of first actions for each pair used as move probabilities in three state line like POMDP,
+when trying to have a strategy that has the biggest probability of being in final state after specified number of moves.
 
 #### `plot_table.cpp`
 
-Executable that accepts exactly three arguments, first file with probabilities, second a number of steps and
-third a dimension - number of states in POMDP minus. With the probabilities, dimension and count plots a table with
-optimal strategies, using the `plot_table` function from `plotting.hpp`.
+Executable that accepts exactly three arguments, first file with probabilities, second a number of steps and third a
+dimension - number of states in POMDP minus one. With the probabilities, dimension and count plots a table with optimal
+strategies, using the `plot_table` function from `plotting.hpp`.
 
 #### `contour_max_prob.cpp`
 
 Executable that accepts no arguments. Creates contour plot, that visualizes optimal strategies for having the biggest
 probability of being in final state after `t` steps. It displays only values for three state line like POMDPs, with move
 probabilities ranging from 0.01 to 0.99, with 0.01 granularity. Values displayed are the counts of 0-th move to be
-played (rest to the `t` value is 1-th move).
+played (rest to the `t` value is 1-st move).
 
 #### `contour_percentile.cpp`
 
@@ -263,16 +267,15 @@ Executable that accepts range of options. It creates a contour plot for the opti
 
 - `--prob1-count` - number of different probabilities of moving from state 0 to state 1
 - `--prob2-count`  - number of different probabilities of moving from state 1 to state 2
-- `--grain` - the difference between two probabilities that are right behind each other
+- `--grain` - the difference between two probabilities that are right next to each other
     - if start with 0.01 (`--start-probX`) and set the grain to 0.01 with three probabilities (`--probX-count`), it will
-      be plotted for
-      these probabilities: 0.01, 0.02, 0.03
+      be plotted for these probabilities: 0.01, 0.02, 0.03
 - `--start-prob1` - lowest probability of moving from state 0 to state 1
 - `--start-prob2` - lowest probability of moving from state 1 to state 2
 - `--colors` - number of different colors for matplotlib ot use. Not important parameter, by default set to 1.
 - `--threshold-val` - value of threshold, probability of being in final state we want to achieve.
 - `--display-val` - what information about the strategies to display, two possible values
-    - `string-val` - actual moves, displayed with `A` for move from state 0 to state 1, `B` for move from state 1 to
+    - `string-val` - actual moves, displays `A` for move from state 0 to state 1, `B` for move from state 1 to
       state 2
     - `string-len` - displays the length of optimal strategy that gets us to have probability at least `threshold` of
       being in final state
