@@ -13,6 +13,8 @@ mkShell {
     export PYTHONPATH=${python3Packages.pybind11}/lib/python3.13/site-packages:$PYTHONPATH
     export PYTHONPATH=$PWD/src/build:$PYTHONPATH
     export PYTHONPATH=$PWD/src/cmake-build-debug:$PYTHONPATH
+    export PATH=$PWD/src/build/strategy-plotter:$PATH
+    export PATH=$PWD/src/cmake-build-debug/strategy-plotter:$PATH
     echo "Python interpreter path: $(which python)"
   '';
 }
