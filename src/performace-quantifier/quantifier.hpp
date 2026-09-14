@@ -70,13 +70,13 @@ std::size_t simulate_expectation(const belief &startb, const P &pomdp, It &polic
     std::size_t count = 0;
     auto state = sample_index(startb.bel);
 
-    while (!pomdp.IsFinalState(state)) {
+    while (!pomdp.is_final_state(state)) {
         const action action = *policy;
         ++policy;
-        auto nextb = pomdp.SimulateAction(action, state);
+        auto nextb = pomdp.simulate_action(action, state);
         ++count;
 
-        state = sampleIndex(nextb.bel);
+        state = sample_index(nextb.bel);
     }
 
     return count;
@@ -85,11 +85,11 @@ std::size_t simulate_expectation(const belief &startb, const P &pomdp, It &polic
 template<typename It, typename P>
 double quantify_expectation_s(const belief &startb, const P &pomdp, It &policy, const std::size_t reps) {
     policy.reset();
-    double avg = simulateExpectation<It, P>(startb, pomdp, policy);
+    double avg = simulate_expectation<It, P>(startb, pomdp, policy);
 
     for (std::size_t i = 2; i <= reps; ++i) {
         policy.reset();
-        const double new_val = simulateExpectation<It, P>(startb, pomdp, policy);
+        const double new_val = simulate_expectation<It, P>(startb, pomdp, policy);
         avg = avg + (new_val - avg) / static_cast<double>(i);
     }
 
@@ -98,7 +98,7 @@ double quantify_expectation_s(const belief &startb, const P &pomdp, It &policy, 
 
 template<typename It, typename P>
 double quantify_expectation_s(const belief &startb, const P &pomdp, It &policy) {
-    return quantifyExpectation_s<It, P>(startb, pomdp, policy, 10000);
+    return quantify_expectation_s<It, P>(startb, pomdp, policy, 10000);
 }
 
 // Calculates after how many actions taken with pomdp, startb and policy we will have probability at least threshold,
