@@ -182,7 +182,7 @@ This folder contains functions that compute the best strategies for POMDP game t
     - `using value_type = std::vector<val_t>`
     - `const value_type &operator*() const` - returns current permutation
     - `permutation_iterator &operator++()` - advances to next permutation
-    - `permutation_iterator operator++(int)` - advances to next permuation
+    - `permutation_iterator operator++(int)` - advances to next permutation
     - `friend bool operator==(const permutation_iterator &it, const std::default_sentinel_t)` - equality comparison
 - `class permutations_with_repetition_view<R>` - view class for permutations with repetition
     - `iterator begin() const` - returns iterator to first permutation
