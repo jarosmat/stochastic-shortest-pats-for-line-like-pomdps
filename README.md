@@ -2,6 +2,7 @@
 
 - [Programmer documentation](docs/programmer.md)
 - [User documentation](docs/user.md)
+- [Interesting examples](docs/examples.md)
 
 ## Build
 
