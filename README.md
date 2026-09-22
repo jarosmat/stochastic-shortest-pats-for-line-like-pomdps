@@ -28,8 +28,11 @@ quantities:
 
 1. Maximize probability of being in final state after fixed number of moves
 2. Considering a threshold probability $t$, two quantities:
-    1. minimizing number of moves before having probability of at least $t$ of being in the final state
-    2. minimizing expected number of moves before reaching the last state with probability of at least $t$
+    1. minimizing the length of strategy that gets us probability of at least $t$ of having reached the final state.
+    2. minimizing expected number of moves before having probability of at least $t$ of having reached the final state.
+        - sum
+          of: $[\text{number of moves } (k)] * \frac{[\text{increase in probability that we reached final state after } k \text{ moves}]}{t}$
+          until $t$ is reached (including the value, when $t$ is reached, after that nothing is added)
 
 ### `src/strategy-plotter/contour_max_prob.cpp`
 
