@@ -18,7 +18,7 @@ $(S, b_{0}, T \subseteq S, A, \{P_{a} (s'|s) |a \in A, s',s \in S \}, \{c (a, s)
 
 The type in question has a state space of $n \in N, n\geq 3$ states, forming a line. This means that there is only one
 final state, the state $n$, the initial belief is that the agent is in the state $0$ with probability $1$, there
-are $[n-1]$ possible actions, probabilities $ 0 < P_i (i + 1| i) < 1$ are arbitrary, with any other $P_a (s'|s)$ being
+are $[n-1]$ possible actions, probabilities $0 < P_i (i + 1| i) < 1$ are arbitrary, with any other $P_a (s'|s)$ being
 zero, cost of taking any action in any state is $1$, there are two observations - agent is in the final state and agent
 is not in the final state, lastly agent observes that it is not in final state with probability of $1$ after moving into
 non-final state and with probability $1$ it observes it is in final state after moving there.
