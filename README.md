@@ -4,7 +4,7 @@ Project is focused on finding the best policies for certain type of POMDPs (Part
 Processes). POMDP is a mathematical framework for modeling decisions of agent under uncertainty. Agent can make
 decisions based on its belief of its current state - it does not know its exact positions, make observations about its
 positions, its goal is to get to final state. Formally it is a given by tuple:
-$ (S, b_{0}, T \subseteq S, A, \{P_{a} (s'|s) |a \in A, s',s \in S \}, \{c (a, s)| a \in A, s \in S /T\}, O, \{Q_a (o|s)| a \in A, o \in O, s \in S\}) $
+$(S, b_{0}, T \subseteq S, A, \{P_{a} (s'|s) |a \in A, s',s \in S \}, \{c (a, s)| a \in A, s \in S /T\}, O, \{Q_a (o|s)| a \in A, o \in O, s \in S\})$
 
 1. $S$ is non-empty state space
 2. $b_0$ is initial belief of agents position - distribution over $S$
